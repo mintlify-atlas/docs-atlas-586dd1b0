@@ -1,0 +1,69 @@
+{
+  "projectType": "frontend",
+  "projectName": "Q-Sopa",
+  "projectDescription": "A React-based restaurant menu web application with dynamic category filtering and product display",
+  "theme": "almond",
+  "primaryColor": "#f1d262",
+  "lightColor": "#7c6c34",
+  "darkColor": "#19160b",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
+          },
+          {
+            "group": "Development",
+            "pages": ["development/setup", "development/structure", "development/styling"]
+          },
+          {
+            "group": "Components",
+            "pages": [
+              "components/overview",
+              "components/navbar",
+              "components/categories",
+              "components/product-card",
+              "components/logo-splash",
+              "components/footer"
+            ]
+          },
+          {
+            "group": "API Integration",
+            "pages": ["api/overview", "api/endpoints", "api/usage"]
+          }
+        ]
+      },
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Building",
+            "pages": ["guides/customization", "guides/deployment", "guides/troubleshooting"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Dynamic category-based product filtering",
+    "Responsive navbar with mobile drawer menu",
+    "Product card display with badges and pricing",
+    "REST API integration for menu data",
+    "Material Symbols icon integration",
+    "Loading and error state handling"
+  ],
+  "publicApiSurface": [
+    "getCategorias() - Fetch all product categories",
+    "getComidas() - Fetch all food products",
+    "getProductsByCategory(categoryId) - Fetch products by category",
+    "<Navbar /> - Navigation component with categories",
+    "<Categories /> - Category filter component",
+    "<ProductCard /> - Product display component",
+    "<LogoSplash /> - Splash screen component",
+    "<Footer /> - Footer component",
+    "<Menu /> - Main menu page component"
+  ]
+}
