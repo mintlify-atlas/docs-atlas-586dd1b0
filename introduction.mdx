@@ -1,0 +1,188 @@
+---
+title: Introduction
+description: Welcome to Q-Sopa - A modern React restaurant menu web application
+---
+
+# Welcome to Q-Sopa
+
+Q-Sopa is a modern, responsive restaurant menu web application built with React 19 and Vite. It provides an elegant and intuitive interface for browsing restaurant menu items across different categories, delivering a premium dining experience through a digital platform.
+
+## What is Q-Sopa?
+
+Q-Sopa is a single-page application that showcases a restaurant's menu with dynamic category filtering, beautiful product cards, and a responsive design that works seamlessly across all devices. The application fetches menu data from a REST API and presents it with an emphasis on visual appeal and user experience.
+
+<CardGroup cols={2}>
+  <Card title="Modern UI/UX" icon="palette">
+    Clean, minimalist design with smooth animations and a responsive layout optimized for mobile and desktop
+  </Card>
+  <Card title="Dynamic Filtering" icon="filter">
+    Browse menu items by category with real-time filtering and loading states
+  </Card>
+  <Card title="REST API Integration" icon="cloud">
+    Seamless integration with a backend API for fetching categories and products
+  </Card>
+  <Card title="Material Symbols" icon="star">
+    Beautiful icons from Google's Material Symbols library for enhanced visual communication
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Dynamic Category Navigation
+The application features a sophisticated category navigation system that adapts to screen size:
+- **Desktop**: Horizontal navigation bar with icon-based category buttons
+- **Mobile**: Hamburger menu with slide-out drawer for category selection
+- **Interactive States**: Visual feedback with active states and smooth transitions
+
+### Product Display System
+Menu items are presented using custom product cards that include:
+- High-quality product images
+- Pricing information
+- Optional badge labels (e.g., "New", "Popular")
+- Interactive "Ingredientes" button
+
+### Loading & Error States
+Robust state management with dedicated UI for:
+- Loading spinners during data fetching
+- Error messages with clear user feedback
+- Empty state handling when no products are available
+
+### Animated Logo Splash
+When no category is selected, users see an animated logo splash screen with:
+- Ripple animation effects
+- Clear call-to-action to select a category
+- Brand-focused initial experience
+
+## Technology Stack
+
+Q-Sopa is built with modern web technologies:
+
+<CardGroup cols={2}>
+  <Card title="React 19" icon="react">
+    Latest React version with hooks (useState, useEffect) for state management
+  </Card>
+  <Card title="Vite" icon="bolt">
+    Lightning-fast build tool with HMR (Hot Module Replacement) for optimal developer experience
+  </Card>
+  <Card title="Fetch API" icon="download">
+    Native browser API for HTTP requests to the backend
+  </Card>
+  <Card title="Material Symbols" icon="shapes">
+    Google's Material Symbols for consistent, beautiful iconography
+  </Card>
+</CardGroup>
+
+### Dependencies
+
+```json package.json
+{
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.1",
+    "vite": "^7.3.1",
+    "eslint": "^9.39.1"
+  }
+}
+```
+
+## Architecture Overview
+
+Q-Sopa follows a component-based architecture with clear separation of concerns:
+
+### Project Structure
+
+```
+src/
+├── assets/              # Images and static assets
+├── components/          # Reusable UI components
+│   ├── navbar/         # Navigation bar component
+│   ├── Categories/     # Category filtering component
+│   ├── ProductCard/    # Product display card
+│   ├── LogoSplash/     # Animated logo screen
+│   └── footer/         # Footer component
+├── pages/              # Page components
+│   └── Menu.jsx        # Main menu page
+├── services/           # API service layer
+│   └── api.js          # API functions
+├── App.jsx             # Root application component
+└── main.jsx            # Application entry point
+```
+
+### Component Hierarchy
+
+```
+App
+ └── Menu
+     ├── Navbar
+     │   └── Categories
+     ├── LogoSplash (conditional)
+     ├── ProductCard[] (conditional)
+     └── Footer
+```
+
+### Data Flow
+
+1. **User Interaction**: User selects a category from the Navbar
+2. **State Update**: `Menu` component updates `activeCategoryId` state
+3. **API Call**: `useEffect` triggers API request via `getProductsByCategory()`
+4. **Loading State**: UI shows loading spinner
+5. **Data Display**: Products are rendered as `ProductCard` components
+6. **Error Handling**: Errors are caught and displayed to the user
+
+## API Integration
+
+The application communicates with a REST API hosted at `https://apiqsp-production.up.railway.app`:
+
+```javascript src/services/api.js
+const BASE_URL = "https://apiqsp-production.up.railway.app";
+
+export const getCategorias = async () => {
+  const res = await fetch(`${BASE_URL}/categories`);
+  if (!res.ok) throw new Error("Error al cargar categorías");
+  return res.json();
+};
+
+export const getProductsByCategory = async (categoryId) => {
+  const res = await fetch(`${BASE_URL}/products/category/${categoryId}`);
+  if (!res.ok) throw new Error("Error al cargar productos de la categoría");
+  return res.json();
+};
+```
+
+### API Endpoints
+
+- `GET /categories` - Fetch all menu categories
+- `GET /products` - Fetch all products
+- `GET /products/category/:id` - Fetch products by category ID
+
+## Design Philosophy
+
+<Note>
+Q-Sopa emphasizes **simplicity, speed, and visual appeal**. Every component is designed to load quickly, respond immediately to user interaction, and present menu items in the most appetizing way possible.
+</Note>
+
+The application uses a warm color palette with:
+- **Primary Color**: `#f1d262` (warm gold)
+- **Background**: `#3B3B37` (dark charcoal)
+- **Text**: `#FFFFFF` (white)
+- **Font**: Plus Jakarta Sans for modern, friendly typography
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get Q-Sopa running locally in minutes
+  </Card>
+  <Card title="Components" icon="cube" href="/components/overview">
+    Explore the component architecture in detail
+  </Card>
+  <Card title="API Reference" icon="code" href="/api/overview">
+    Learn about the API service layer
+  </Card>
+  <Card title="Styling" icon="paintbrush" href="/development/styling">
+    Understand the CSS architecture and design system
+  </Card>
+</CardGroup>

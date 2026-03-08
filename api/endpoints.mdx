@@ -1,0 +1,445 @@
+---
+title: API Endpoints
+description: Complete reference for all Q-Sopa API functions and endpoints
+---
+
+## Available Functions
+
+The `src/services/api.js` module exports three async functions for fetching menu data. All functions are promise-based and should be used with `async/await` or `.then()/.catch()` patterns.
+
+---
+
+## getCategorias
+
+Fetches all menu categories from the backend.
+
+### Function Signature
+
+```javascript
+export const getCategorias = async () => Promise<Category[]>
+```
+
+### Parameters
+
+<ParamField path="none" type="void">
+  This function takes no parameters
+</ParamField>
+
+### Return Type
+
+<ResponseField name="categories" type="array">
+  Array of category objects
+  
+  <ResponseField name="id" type="number" required>
+    Unique category identifier
+  </ResponseField>
+  
+  <ResponseField name="name" type="string" required>
+    Display name of the category (e.g., "Hamburguesas", "Bebidas")
+  </ResponseField>
+  
+  <ResponseField name="icon" type="string" required>
+    Material Symbols icon name (e.g., "lunch_dining", "local_cafe")
+  </ResponseField>
+</ResponseField>
+
+### Implementation
+
+```javascript src/services/api.js
+const BASE_URL = "https://apiqsp-production.up.railway.app";
+
+export const getCategorias = async () => {
+  const res = await fetch(`${BASE_URL}/categories`);
+  if (!res.ok) throw new Error("Error al cargar categorías");
+  return res.json();
+};
+```
+
+### HTTP Request
+
+<CodeGroup>
+```bash cURL
+curl https://apiqsp-production.up.railway.app/categories
+```
+
+```javascript Fetch
+fetch('https://apiqsp-production.up.railway.app/categories')
+  .then(res => res.json())
+  .then(data => console.log(data));
+```
+
+```javascript Axios
+import axios from 'axios';
+
+const response = await axios.get(
+  'https://apiqsp-production.up.railway.app/categories'
+);
+console.log(response.data);
+```
+</CodeGroup>
+
+### Example Response
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Hamburguesas",
+    "icon": "lunch_dining"
+  },
+  {
+    "id": 2,
+    "name": "Bebidas",
+    "icon": "local_cafe"
+  },
+  {
+    "id": 3,
+    "name": "Postres",
+    "icon": "cake"
+  }
+]
+```
+
+### Error Handling
+
+```javascript
+try {
+  const categories = await getCategorias();
+  console.log(categories);
+} catch (error) {
+  console.error('Failed to load categories:', error.message);
+  // Error message: "Error al cargar categorías"
+}
+```
+
+<Note>
+  This endpoint is typically called once on component mount to populate the navigation menu.
+</Note>
+
+---
+
+## getComidas
+
+Fetches all products across all categories.
+
+### Function Signature
+
+```javascript
+export const getComidas = async () => Promise<Product[]>
+```
+
+### Parameters
+
+<ParamField path="none" type="void">
+  This function takes no parameters
+</ParamField>
+
+### Return Type
+
+<ResponseField name="products" type="array">
+  Array of product objects
+  
+  <ResponseField name="id" type="number" required>
+    Unique product identifier
+  </ResponseField>
+  
+  <ResponseField name="name" type="string" required>
+    Product name (e.g., "Hamburguesa Clásica")
+  </ResponseField>
+  
+  <ResponseField name="price" type="number" required>
+    Product price as a number
+  </ResponseField>
+  
+  <ResponseField name="imageUrl" type="string" required>
+    Full URL to the product image
+  </ResponseField>
+  
+  <ResponseField name="badge" type="string | null">
+    Optional badge label (e.g., "Popular", "Nuevo", "Especial")
+  </ResponseField>
+  
+  <ResponseField name="categoryId" type="number">
+    Reference to the parent category ID
+  </ResponseField>
+</ResponseField>
+
+### Implementation
+
+```javascript src/services/api.js
+export const getComidas = async () => {
+  const res = await fetch(`${BASE_URL}/products`);
+  if (!res.ok) throw new Error("Error al cargar comidas");
+  return res.json();
+};
+```
+
+### HTTP Request
+
+<CodeGroup>
+```bash cURL
+curl https://apiqsp-production.up.railway.app/products
+```
+
+```javascript Fetch
+fetch('https://apiqsp-production.up.railway.app/products')
+  .then(res => res.json())
+  .then(data => console.log(data));
+```
+
+```javascript Axios
+import axios from 'axios';
+
+const response = await axios.get(
+  'https://apiqsp-production.up.railway.app/products'
+);
+console.log(response.data);
+```
+</CodeGroup>
+
+### Example Response
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Hamburguesa Clásica",
+    "price": 8.99,
+    "imageUrl": "https://example.com/images/burger-classic.jpg",
+    "badge": "Popular",
+    "categoryId": 1
+  },
+  {
+    "id": 2,
+    "name": "Coca Cola",
+    "price": 2.50,
+    "imageUrl": "https://example.com/images/coca-cola.jpg",
+    "badge": null,
+    "categoryId": 2
+  }
+]
+```
+
+### Error Handling
+
+```javascript
+try {
+  const products = await getComidas();
+  console.log(`Loaded ${products.length} products`);
+} catch (error) {
+  console.error('Failed to load products:', error.message);
+  // Error message: "Error al cargar comidas"
+}
+```
+
+<Warning>
+  This endpoint returns ALL products regardless of category. For filtered results, use `getProductsByCategory()` instead.
+</Warning>
+
+---
+
+## getProductsByCategory
+
+Fetches products filtered by a specific category ID.
+
+### Function Signature
+
+```javascript
+export const getProductsByCategory = async (categoryId: number) => Promise<Product[]>
+```
+
+### Parameters
+
+<ParamField path="categoryId" type="number" required>
+  The unique identifier of the category to filter by. Must match a valid category ID from `getCategorias()`.
+</ParamField>
+
+### Return Type
+
+<ResponseField name="products" type="array">
+  Array of product objects belonging to the specified category
+  
+  <ResponseField name="id" type="number" required>
+    Unique product identifier
+  </ResponseField>
+  
+  <ResponseField name="name" type="string" required>
+    Product name
+  </ResponseField>
+  
+  <ResponseField name="price" type="number" required>
+    Product price
+  </ResponseField>
+  
+  <ResponseField name="imageUrl" type="string" required>
+    Product image URL
+  </ResponseField>
+  
+  <ResponseField name="badge" type="string | null">
+    Optional badge label
+  </ResponseField>
+</ResponseField>
+
+### Implementation
+
+```javascript src/services/api.js
+export const getProductsByCategory = async (categoryId) => {
+  const res = await fetch(`${BASE_URL}/products/category/${categoryId}`);
+  if (!res.ok) throw new Error("Error al cargar productos de la categoría");
+  return res.json();
+};
+```
+
+### HTTP Request
+
+<CodeGroup>
+```bash cURL
+# Fetch products for category ID 1
+curl https://apiqsp-production.up.railway.app/products/category/1
+```
+
+```javascript Fetch
+// Fetch products for category ID 1
+fetch('https://apiqsp-production.up.railway.app/products/category/1')
+  .then(res => res.json())
+  .then(data => console.log(data));
+```
+
+```javascript Axios
+import axios from 'axios';
+
+const categoryId = 1;
+const response = await axios.get(
+  `https://apiqsp-production.up.railway.app/products/category/${categoryId}`
+);
+console.log(response.data);
+```
+</CodeGroup>
+
+### Usage Example
+
+```javascript
+// Fetch all hamburgers (category ID 1)
+const hamburgers = await getProductsByCategory(1);
+
+// Fetch all drinks (category ID 2)
+const drinks = await getProductsByCategory(2);
+```
+
+### Example Response
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Hamburguesa Clásica",
+    "price": 8.99,
+    "imageUrl": "https://example.com/images/burger-classic.jpg",
+    "badge": "Popular"
+  },
+  {
+    "id": 3,
+    "name": "Hamburguesa BBQ",
+    "price": 10.99,
+    "imageUrl": "https://example.com/images/burger-bbq.jpg",
+    "badge": "Nuevo"
+  }
+]
+```
+
+### Error Handling
+
+```javascript
+try {
+  const products = await getProductsByCategory(999);
+  // May return empty array or throw error if category doesn't exist
+} catch (error) {
+  console.error('Failed to load category products:', error.message);
+  // Error message: "Error al cargar productos de la categoría"
+}
+```
+
+<Note>
+  If the category ID is valid but has no products, the API returns an empty array `[]` rather than throwing an error.
+</Note>
+
+---
+
+## Endpoint Summary
+
+<CardGroup cols={3}>
+  <Card title="GET /categories" icon="folder">
+    Returns all menu categories with icons
+  </Card>
+  <Card title="GET /products" icon="list">
+    Returns all products across categories
+  </Card>
+  <Card title="GET /products/category/:id" icon="filter">
+    Returns products for specific category
+  </Card>
+</CardGroup>
+
+## Common Patterns
+
+### Sequential Data Loading
+
+Load categories first, then products based on user selection:
+
+```javascript
+// 1. Load categories on mount
+const categories = await getCategorias();
+
+// 2. Load products when user selects a category
+const products = await getProductsByCategory(selectedCategoryId);
+```
+
+### Error Recovery
+
+Implement retry logic for failed requests:
+
+```javascript
+const fetchWithRetry = async (fn, retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+};
+
+const categories = await fetchWithRetry(() => getCategorias());
+```
+
+### Type Safety
+
+For TypeScript projects, define interfaces:
+
+```typescript
+interface Category {
+  id: number;
+  name: string;
+  icon: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  imageUrl: string;
+  badge: string | null;
+}
+
+export const getCategorias = async (): Promise<Category[]> => {
+  const res = await fetch(`${BASE_URL}/categories`);
+  if (!res.ok) throw new Error("Error al cargar categorías");
+  return res.json();
+};
+```
+
+## Next Steps
+
+<Card title="See Real Usage Examples" icon="code" href="/api/usage">
+  Learn how these functions are used in actual components from the Q-Sopa codebase
+</Card>

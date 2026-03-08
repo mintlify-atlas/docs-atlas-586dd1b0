@@ -1,0 +1,236 @@
+---
+title: 'Development Setup'
+description: 'Complete guide to setting up your Q-Sopa development environment'
+icon: 'code'
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    Version 18.0 or higher recommended
+  </Card>
+  <Card title="Package Manager" icon="box">
+    npm (included with Node.js), yarn, or pnpm
+  </Card>
+</CardGroup>
+
+<Note>
+  Q-Sopa uses React 19.2.0 and Vite 7.3.1 as its core build tooling.
+</Note>
+
+## Getting Started
+
+<Steps>
+  <Step title="Clone the Repository">
+    Clone the Q-Sopa repository to your local machine:
+
+    ```bash
+    git clone <repository-url>
+    cd q-sopa
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install all required packages using your preferred package manager:
+
+    <CodeGroup>
+      ```bash npm
+      npm install
+      ```
+
+      ```bash yarn
+      yarn install
+      ```
+
+      ```bash pnpm
+      pnpm install
+      ```
+    </CodeGroup>
+
+    This will install:
+    - **React 19.2.0** - UI library
+    - **React DOM 19.2.0** - DOM-specific methods
+    - **Vite 7.3.1** - Build tool and dev server
+    - **Tailwind CSS 4.2.1** - Utility-first CSS framework
+    - **ESLint** - Code linting
+    - **Autoprefixer & PostCSS** - CSS processing
+  </Step>
+
+  <Step title="Start Development Server">
+    Run the development server with hot module replacement (HMR):
+
+    <CodeGroup>
+      ```bash npm
+      npm run dev
+      ```
+
+      ```bash yarn
+      yarn dev
+      ```
+
+      ```bash pnpm
+      pnpm dev
+      ```
+    </CodeGroup>
+
+    The application will be available at `http://localhost:5173` by default.
+  </Step>
+</Steps>
+
+## Configuration Files
+
+### Vite Configuration
+
+The project uses a minimal Vite configuration located in `vite.config.js`:
+
+```javascript vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+})
+```
+
+<Info>
+  The Vite React plugin provides Fast Refresh support using Babel for optimal development experience.
+</Info>
+
+### ESLint Configuration
+
+Q-Sopa uses the modern flat config format in `eslint.config.js`:
+
+```javascript eslint.config.js
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+```
+
+**Key ESLint Rules:**
+- React Hooks rules for proper hook usage
+- React Refresh for HMR compatibility
+- Custom rule: allows unused variables starting with capital letters or underscores
+
+### Package.json Scripts
+
+The following scripts are available in `package.json`:
+
+```json package.json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  }
+}
+```
+
+## Development Workflow
+
+### Running the Development Server
+
+Start the Vite development server for local development:
+
+```bash
+npm run dev
+```
+
+**Features:**
+- Hot Module Replacement (HMR) for instant updates
+- Fast refresh for React components
+- Error overlay for build errors
+- Optimized dependency pre-bundling
+
+### Linting Your Code
+
+Run ESLint to check for code quality issues:
+
+```bash
+npm run lint
+```
+
+<Tip>
+  Configure your code editor to show ESLint warnings and errors in real-time for the best development experience.
+</Tip>
+
+### Building for Production
+
+Create an optimized production build:
+
+```bash
+npm run build
+```
+
+This command:
+1. Runs the Vite build process
+2. Bundles and minifies JavaScript
+3. Optimizes CSS and assets
+4. Outputs to the `dist/` directory
+
+<Warning>
+  Always test your production build before deploying to ensure all optimizations work correctly.
+</Warning>
+
+### Preview Production Build
+
+Test the production build locally before deployment:
+
+```bash
+npm run preview
+```
+
+This serves the `dist/` directory on a local server, allowing you to verify the production build behavior.
+
+## Environment Variables
+
+The API base URL is configured in `src/services/api.js`:
+
+```javascript src/services/api.js
+const BASE_URL = "https://apiqsp-production.up.railway.app";
+```
+
+<Info>
+  For local development with a different API endpoint, you can modify this value or use Vite's environment variable system with `.env` files.
+</Info>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Project Structure" icon="folder-tree" href="/development/structure">
+    Learn about the file organization and directory structure
+  </Card>
+  <Card title="Styling Guide" icon="palette" href="/development/styling">
+    Understand the CSS approach and styling conventions
+  </Card>
+</CardGroup>

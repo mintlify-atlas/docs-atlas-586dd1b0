@@ -1,0 +1,202 @@
+---
+title: API Overview
+description: Understanding Q-Sopa's REST API architecture and integration patterns
+---
+
+## Introduction
+
+Q-Sopa uses a REST API backend hosted on Railway to serve menu categories and products. The API integration is implemented through a centralized service module that provides clean, reusable functions for all data fetching operations.
+
+## API Architecture
+
+The API follows a simple REST architecture with JSON responses. All API interactions are handled through the `src/services/api.js` module, which exports async functions that wrap native `fetch` calls.
+
+### Base URL
+
+All API requests are made to the production backend:
+
+```javascript
+const BASE_URL = "https://apiqsp-production.up.railway.app";
+```
+
+<Note>
+  The base URL is defined as a constant in the API service module and is automatically prepended to all endpoint paths.
+</Note>
+
+## Service Architecture
+
+The API service (`src/services/api.js`) provides three core functions:
+
+<CardGroup cols={3}>
+  <Card title="getCategorias" icon="folder" href="/api/endpoints#getcategorias">
+    Fetch all available menu categories
+  </Card>
+  <Card title="getComidas" icon="utensils" href="/api/endpoints#getcomidas">
+    Fetch all products across categories
+  </Card>
+  <Card title="getProductsByCategory" icon="filter" href="/api/endpoints#getproductsbycategory">
+    Fetch products filtered by category
+  </Card>
+</CardGroup>
+
+## Authentication
+
+The Q-Sopa API is currently **public** and does not require authentication. All endpoints are accessible without API keys or tokens.
+
+<Warning>
+  For production applications handling sensitive data, consider implementing authentication mechanisms such as API keys or JWT tokens.
+</Warning>
+
+## Request Format
+
+All requests are standard HTTP GET requests that return JSON responses:
+
+```javascript
+const res = await fetch(`${BASE_URL}/endpoint`);
+const data = await res.json();
+```
+
+## Response Format
+
+All successful API responses return JSON data:
+
+<ResponseField name="categories" type="array">
+  Array of category objects from `/categories` endpoint
+  
+  <ResponseField name="id" type="number">
+    Unique category identifier
+  </ResponseField>
+  
+  <ResponseField name="name" type="string">
+    Category display name
+  </ResponseField>
+  
+  <ResponseField name="icon" type="string">
+    Material Symbols icon name
+  </ResponseField>
+</ResponseField>
+
+<ResponseField name="products" type="array">
+  Array of product objects from `/products` endpoints
+  
+  <ResponseField name="id" type="number">
+    Unique product identifier
+  </ResponseField>
+  
+  <ResponseField name="name" type="string">
+    Product name
+  </ResponseField>
+  
+  <ResponseField name="price" type="number">
+    Product price
+  </ResponseField>
+  
+  <ResponseField name="imageUrl" type="string">
+    Product image URL
+  </ResponseField>
+  
+  <ResponseField name="badge" type="string | null">
+    Optional badge label (e.g., "Popular", "New")
+  </ResponseField>
+</ResponseField>
+
+## Error Handling
+
+The API service implements consistent error handling across all functions:
+
+```javascript src/services/api.js
+const res = await fetch(`${BASE_URL}/categories`);
+if (!res.ok) throw new Error("Error al cargar categorías");
+return res.json();
+```
+
+### Error Patterns
+
+Each API function:
+1. Makes a fetch request
+2. Checks the `res.ok` status
+3. Throws a descriptive error if the request failed
+4. Returns parsed JSON on success
+
+<Note>
+  Errors are thrown with Spanish messages matching the application's locale. Components catch these errors and display them to users.
+</Note>
+
+## Error Response Handling
+
+Components using the API should implement try-catch patterns or promise `.catch()` handlers:
+
+```javascript
+getCategorias()
+  .then((data) => setCategories(data))
+  .catch((err) => setError(err.message))
+  .finally(() => setLoading(false));
+```
+
+### Common Error Scenarios
+
+<Card title="Network Errors" icon="wifi">
+  **Status**: `!res.ok`
+  
+  **Message**: "Error al cargar [resource]"
+  
+  **Handling**: Display error message to user, provide retry option
+</Card>
+
+<Card title="Invalid Category ID" icon="exclamation">
+  **Occurs**: When requesting products for non-existent category
+  
+  **Handling**: Check category existence before fetching products
+</Card>
+
+## Performance Considerations
+
+### Caching Strategy
+
+The current implementation fetches data on demand without caching. Consider implementing:
+
+- **React Query** or **SWR** for automatic caching and revalidation
+- **Local Storage** for offline-first capabilities
+- **Memoization** for frequently accessed data
+
+### Loading States
+
+All API calls should implement loading states to provide user feedback:
+
+```javascript
+const [loading, setLoading] = useState(true);
+const [data, setData] = useState([]);
+
+useEffect(() => {
+  getCategorias()
+    .then(setData)
+    .finally(() => setLoading(false));
+}, []);
+```
+
+## Integration Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Centralized Service" icon="code">
+    Keep all API calls in `src/services/api.js` for maintainability
+  </Card>
+  <Card title="Error Boundaries" icon="shield">
+    Implement React error boundaries to catch API errors gracefully
+  </Card>
+  <Card title="Loading States" icon="spinner">
+    Always show loading indicators during API calls
+  </Card>
+  <Card title="Error Messages" icon="message">
+    Display user-friendly error messages in Spanish
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<Card title="Explore API Endpoints" icon="book" href="/api/endpoints">
+  Learn about each API function's signature, parameters, and responses
+</Card>
+
+<Card title="Usage Examples" icon="code" href="/api/usage">
+  See real implementation examples from the Q-Sopa codebase
+</Card>

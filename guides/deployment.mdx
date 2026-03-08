@@ -1,0 +1,592 @@
+---
+title: 'Deployment Guide'
+description: 'Deploy your Q-Sopa application to production with various hosting platforms'
+icon: 'rocket'
+---
+
+## Overview
+
+This guide covers deploying Q-Sopa to production. The application is built with Vite and can be deployed to any static hosting platform.
+
+## Building for Production
+
+Before deploying, you need to create an optimized production build.
+
+### Build Command
+
+```bash
+npm run build
+```
+
+This command:
+1. Bundles your React application
+2. Optimizes assets (minification, tree-shaking)
+3. Creates a `dist/` directory with production-ready files
+
+### Build Configuration
+
+The build is configured in `vite.config.js`:
+
+```javascript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})
+```
+
+<Tip>
+  Preview your production build locally before deploying:
+  
+  ```bash
+  npm run build
+  npm run preview
+  ```
+  
+  This serves the `dist/` folder at `http://localhost:4173`
+</Tip>
+
+## Environment Variables
+
+### Setting Up Environment Variables
+
+Create environment files for different stages:
+
+**`.env.development`** (local development):
+```bash
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+**`.env.production`** (production):
+```bash
+VITE_API_BASE_URL=https://apiqsp-production.up.railway.app
+```
+
+### Using Environment Variables
+
+Update `src/services/api.js` to use environment variables:
+
+```javascript
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://apiqsp-production.up.railway.app";
+
+export const getCategorias = async () => {
+  const res = await fetch(`${BASE_URL}/categories`);
+  if (!res.ok) throw new Error("Error al cargar categorías");
+  return res.json();
+};
+
+export const getComidas = async () => {
+  const res = await fetch(`${BASE_URL}/products`);
+  if (!res.ok) throw new Error("Error al cargar comidas");
+  return res.json();
+};
+
+export const getProductsByCategory = async (categoryId) => {
+  const res = await fetch(`${BASE_URL}/products/category/${categoryId}`);
+  if (!res.ok) throw new Error("Error al cargar productos de la categoría");
+  return res.json();
+};
+```
+
+<Warning>
+  Vite only exposes environment variables prefixed with `VITE_` to your client-side code. Never store sensitive keys in client-side environment variables.
+</Warning>
+
+## Deployment Platforms
+
+### Vercel (Recommended)
+
+Vercel offers seamless deployment with automatic builds and previews.
+
+<Steps>
+  <Step title="Install Vercel CLI">
+    ```bash
+    npm install -g vercel
+    ```
+  </Step>
+  
+  <Step title="Login to Vercel">
+    ```bash
+    vercel login
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    ```bash
+    vercel
+    ```
+    
+    Follow the prompts to configure your project.
+  </Step>
+  
+  <Step title="Set Environment Variables">
+    In the Vercel dashboard:
+    1. Go to Project Settings → Environment Variables
+    2. Add `VITE_API_BASE_URL` with your production API URL
+    3. Redeploy to apply changes
+  </Step>
+</Steps>
+
+#### Vercel Configuration
+
+Create `vercel.json` in your project root:
+
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+```
+
+#### GitHub Integration
+
+For automatic deployments:
+
+1. Push your code to GitHub
+2. Import your repository in [Vercel Dashboard](https://vercel.com/new)
+3. Configure build settings:
+   - **Framework Preset**: Vite
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+4. Add environment variables
+5. Deploy
+
+<Note>
+  Every push to your main branch will trigger an automatic deployment. Pull requests get preview deployments.
+</Note>
+
+### Netlify
+
+Netlify is another excellent option for static sites.
+
+<Steps>
+  <Step title="Install Netlify CLI">
+    ```bash
+    npm install -g netlify-cli
+    ```
+  </Step>
+  
+  <Step title="Login to Netlify">
+    ```bash
+    netlify login
+    ```
+  </Step>
+  
+  <Step title="Initialize Netlify">
+    ```bash
+    netlify init
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    ```bash
+    netlify deploy --prod
+    ```
+  </Step>
+</Steps>
+
+#### Netlify Configuration
+
+Create `netlify.toml` in your project root:
+
+```toml
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  NODE_VERSION = "18"
+```
+
+#### Setting Environment Variables
+
+In Netlify Dashboard:
+1. Go to Site Settings → Build & Deploy → Environment
+2. Add `VITE_API_BASE_URL`
+3. Trigger a new deploy
+
+### Railway
+
+Deploy alongside your backend API on Railway.
+
+<Steps>
+  <Step title="Install Railway CLI">
+    ```bash
+    npm install -g @railway/cli
+    ```
+  </Step>
+  
+  <Step title="Login to Railway">
+    ```bash
+    railway login
+    ```
+  </Step>
+  
+  <Step title="Initialize Project">
+    ```bash
+    railway init
+    ```
+  </Step>
+  
+  <Step title="Add Build Configuration">
+    Create `railway.json`:
+    
+    ```json
+    {
+      "$schema": "https://railway.app/railway.schema.json",
+      "build": {
+        "builder": "NIXPACKS",
+        "buildCommand": "npm run build"
+      },
+      "deploy": {
+        "startCommand": "npm run preview",
+        "restartPolicyType": "ON_FAILURE"
+      }
+    }
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    ```bash
+    railway up
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  Railway is particularly useful if your API is already hosted there, as both frontend and backend can be in the same project.
+</Note>
+
+### GitHub Pages
+
+Deploy to GitHub Pages for free static hosting.
+
+<Steps>
+  <Step title="Update vite.config.js">
+    Add base path for GitHub Pages:
+    
+    ```javascript
+    import { defineConfig } from 'vite'
+    import react from '@vitejs/plugin-react'
+    
+    export default defineConfig({
+      plugins: [react()],
+      base: '/your-repo-name/', // Replace with your repository name
+    })
+    ```
+  </Step>
+  
+  <Step title="Install gh-pages">
+    ```bash
+    npm install --save-dev gh-pages
+    ```
+  </Step>
+  
+  <Step title="Add Deploy Scripts">
+    Update `package.json`:
+    
+    ```json
+    {
+      "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "predeploy": "npm run build",
+        "deploy": "gh-pages -d dist"
+      }
+    }
+    ```
+  </Step>
+  
+  <Step title="Deploy">
+    ```bash
+    npm run deploy
+    ```
+    
+    This builds your app and pushes it to the `gh-pages` branch.
+  </Step>
+  
+  <Step title="Enable GitHub Pages">
+    1. Go to your repository settings
+    2. Navigate to Pages section
+    3. Set source to `gh-pages` branch
+    4. Save
+  </Step>
+</Steps>
+
+### Cloudflare Pages
+
+Deploy with Cloudflare's global CDN.
+
+<Steps>
+  <Step title="Connect Repository">
+    1. Log in to [Cloudflare Dashboard](https://dash.cloudflare.com/)
+    2. Go to Pages → Create a project
+    3. Connect your GitHub repository
+  </Step>
+  
+  <Step title="Configure Build">
+    - **Framework preset**: Vite
+    - **Build command**: `npm run build`
+    - **Build output directory**: `dist`
+  </Step>
+  
+  <Step title="Set Environment Variables">
+    Add `VITE_API_BASE_URL` in the environment variables section
+  </Step>
+  
+  <Step title="Deploy">
+    Click "Save and Deploy"
+  </Step>
+</Steps>
+
+## CORS Configuration
+
+If your API and frontend are on different domains, you may encounter CORS issues.
+
+### Backend CORS Setup
+
+Your API must allow requests from your frontend domain. Example Express.js configuration:
+
+```javascript
+const express = require('express');
+const cors = require('cors');
+const app = express();
+
+// Allow your production domain
+app.use(cors({
+  origin: ['https://your-frontend-domain.com', 'http://localhost:5173'],
+  credentials: true
+}));
+
+// Your API routes...
+```
+
+<Warning>
+  Never use `cors({origin: '*'})` in production. Always specify allowed origins explicitly.
+</Warning>
+
+## Performance Optimization
+
+### Image Optimization
+
+1. **Use WebP format** for better compression
+2. **Implement lazy loading**:
+
+```jsx
+// In ProductCard.jsx
+<img 
+  src={image} 
+  alt={title}
+  loading="lazy"
+/>
+```
+
+3. **Use CDN for images**: Host product images on a CDN like Cloudinary or Imgix
+
+### Code Splitting
+
+Vite automatically handles code splitting, but you can optimize further:
+
+```jsx
+import { lazy, Suspense } from 'react';
+
+const Menu = lazy(() => import('./pages/Menu'));
+
+function App() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Menu />
+    </Suspense>
+  );
+}
+```
+
+### Caching Strategy
+
+Implement API response caching:
+
+```javascript
+// src/services/api.js
+const cache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+export const getCategorias = async () => {
+  const cacheKey = 'categories';
+  const cached = cache.get(cacheKey);
+  
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  
+  const res = await fetch(`${BASE_URL}/categories`);
+  if (!res.ok) throw new Error("Error al cargar categorías");
+  const data = await res.json();
+  
+  cache.set(cacheKey, { data, timestamp: Date.now() });
+  return data;
+};
+```
+
+## Monitoring and Analytics
+
+### Adding Google Analytics
+
+1. **Install the package**:
+```bash
+npm install react-ga4
+```
+
+2. **Initialize in your app**:
+```jsx
+// src/main.jsx
+import ReactGA from 'react-ga4';
+
+ReactGA.initialize('G-XXXXXXXXXX');
+
+// Track page views
+ReactGA.send({ hitType: "pageview", page: window.location.pathname });
+```
+
+### Error Tracking with Sentry
+
+1. **Install Sentry**:
+```bash
+npm install @sentry/react
+```
+
+2. **Configure**:
+```jsx
+// src/main.jsx
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+  dsn: "your-sentry-dsn",
+  environment: import.meta.env.MODE,
+  tracesSampleRate: 1.0,
+});
+```
+
+## Deployment Checklist
+
+<Steps>
+  <Step title="Pre-deployment">
+    - [ ] Update API URL for production
+    - [ ] Test build locally (`npm run build && npm run preview`)
+    - [ ] Verify all environment variables
+    - [ ] Check for console errors
+    - [ ] Test on multiple browsers
+    - [ ] Verify mobile responsiveness
+  </Step>
+  
+  <Step title="Deployment">
+    - [ ] Choose hosting platform
+    - [ ] Configure build settings
+    - [ ] Set environment variables
+    - [ ] Deploy application
+    - [ ] Verify deployment URL
+  </Step>
+  
+  <Step title="Post-deployment">
+    - [ ] Test all features in production
+    - [ ] Verify API connectivity
+    - [ ] Check loading times
+    - [ ] Test category filtering
+    - [ ] Confirm product images load
+    - [ ] Test mobile drawer menu
+    - [ ] Set up monitoring/analytics
+  </Step>
+</Steps>
+
+## Continuous Deployment
+
+Set up automatic deployments with GitHub Actions:
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          vercel-args: '--prod'
+```
+
+## Troubleshooting Deployment
+
+<AccordionGroup>
+  <Accordion title="Build fails with 'MODULE_NOT_FOUND'">
+    Ensure all dependencies are in `package.json`:
+    
+    ```bash
+    rm -rf node_modules package-lock.json
+    npm install
+    npm run build
+    ```
+  </Accordion>
+  
+  <Accordion title="Blank page after deployment">
+    Check the browser console for errors. Common causes:
+    - Incorrect `base` path in `vite.config.js`
+    - Missing environment variables
+    - CORS issues with API
+  </Accordion>
+  
+  <Accordion title="Environment variables not working">
+    Remember:
+    - Variables must be prefixed with `VITE_`
+    - Rebuild after changing environment variables
+    - Access with `import.meta.env.VITE_VARIABLE_NAME`
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Fix common issues and errors
+  </Card>
+  <Card title="Customization" icon="palette" href="/guides/customization">
+    Customize the application
+  </Card>
+</CardGroup>

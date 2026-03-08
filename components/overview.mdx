@@ -1,0 +1,118 @@
+---
+title: Components Overview
+description: Overview of all React components in the Q-Sopa menu application
+---
+
+## Component Architecture
+
+Q-Sopa is built with a modular component architecture using React. The application consists of five core components that work together to create a dynamic restaurant menu experience.
+
+### Component Hierarchy
+
+```
+App
+└── Menu (page)
+    ├── Navbar
+    │   └── Categories
+    ├── LogoSplash
+    ├── ProductCard (multiple instances)
+    └── Footer
+```
+
+## Import Patterns
+
+All components follow a consistent import pattern:
+
+```jsx
+import Navbar from "./components/navbar/Navbar";
+import Categories from "./components/Categories/Categories";
+import ProductCard from "./components/ProductCard/ProductCard";
+import LogoSplash from "./components/LogoSplash/LogoSplash";
+import Footer from "./components/footer/footer";
+```
+
+Each component is located in its own directory with accompanying CSS:
+
+```
+src/components/
+├── navbar/
+│   ├── Navbar.jsx
+│   └── Navbar.css
+├── Categories/
+│   ├── Categories.jsx
+│   └── Categories.css
+├── ProductCard/
+│   ├── ProductCard.jsx
+│   └── ProductCard.css
+├── LogoSplash/
+│   ├── LogoSplash.jsx
+│   └── LogoSplash.css
+└── footer/
+    ├── footer.jsx
+    └── footer.css
+```
+
+## Available Components
+
+<CardGroup cols={2}>
+  <Card title="Navbar" icon="bars" href="/components/navbar">
+    Top navigation bar with logo and category menu integration
+  </Card>
+  
+  <Card title="Categories" icon="grid" href="/components/categories">
+    Responsive category selector with desktop horizontal menu and mobile drawer
+  </Card>
+  
+  <Card title="ProductCard" icon="square" href="/components/product-card">
+    Reusable card component for displaying menu items with image, title, price, and badge
+  </Card>
+  
+  <Card title="LogoSplash" icon="image" href="/components/logo-splash">
+    Welcome screen with animated logo displayed when no category is selected
+  </Card>
+  
+  <Card title="Footer" icon="copyright" href="/components/footer">
+    Simple footer with copyright information
+  </Card>
+</CardGroup>
+
+## Component Communication
+
+The application uses callback props for parent-child communication:
+
+```jsx
+// Menu.jsx - Parent component manages state
+const [activeCategoryId, setActiveCategoryId] = useState(null);
+const [products, setProducts] = useState([]);
+
+const handleCategoryChange = (categoryId) => {
+  setActiveCategoryId(categoryId);
+};
+
+// Pass callback to child components
+<Navbar onCategoryChange={handleCategoryChange} />
+```
+
+The `Categories` component receives the callback and triggers it when a category is selected, updating the parent state and fetching new products.
+
+## Styling Approach
+
+All components use CSS modules with BEM-inspired naming conventions:
+
+- Each component has its own `.css` file
+- Class names use semantic naming (e.g., `.product-card`, `.navbar-wrapper`)
+- Responsive styles handle desktop and mobile layouts
+- CSS custom properties are used for consistent theming
+
+## Data Flow
+
+1. **Categories component** fetches available categories from the API
+2. User selects a category
+3. **Navbar** passes the category ID up to the **Menu** page via `onCategoryChange` callback
+4. **Menu** page fetches products for that category
+5. **ProductCard** components render the product data
+6. When no category is selected, **LogoSplash** is displayed
+
+<Note>
+  All components are functional components using React hooks (useState, useEffect) for state management and side effects.
+</Note>

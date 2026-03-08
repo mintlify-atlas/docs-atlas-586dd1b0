@@ -1,0 +1,312 @@
+---
+title: ProductCard Component
+description: Reusable card component for displaying menu items with image, title, price, and optional badge
+---
+
+## Overview
+
+The ProductCard component is a presentational component that displays individual menu items in a visually appealing card format. It shows the product image, name, price, an optional badge, and an ingredients button.
+
+## Location
+
+```
+src/components/ProductCard/ProductCard.jsx
+src/components/ProductCard/ProductCard.css
+```
+
+## Props
+
+<ParamField path="title" type="string" required>
+  The name of the menu item to display.
+  
+  ```jsx
+  title="Hamburguesa Clásica"
+  ```
+</ParamField>
+
+<ParamField path="price" type="number" required>
+  The price of the item. Displayed with a dollar sign prefix.
+  
+  ```jsx
+  price={12.99}
+  ```
+</ParamField>
+
+<ParamField path="image" type="string" required>
+  URL or path to the product image.
+  
+  ```jsx
+  image="https://example.com/burger.jpg"
+  ```
+</ParamField>
+
+<ParamField path="badge" type="string" optional>
+  Optional badge text to display in the top-right corner of the card. Useful for labels like "NEW", "POPULAR", "SPICY", etc.
+  
+  ```jsx
+  badge="Nuevo"
+  ```
+  
+  If not provided or `null`, no badge is displayed.
+</ParamField>
+
+## Source Code
+
+```jsx src/components/ProductCard/ProductCard.jsx
+import "./ProductCard.css";
+
+export default function ProductCard({ title, price, image, badge }) {
+  return (
+    <div className="product-card">
+
+      {badge && <div className="badge">{badge}</div>}
+
+      <img src={image} alt={title} />
+
+      <div className="product-info">
+        <h4>{title}</h4>
+        <span>${price}</span>
+      </div>
+
+      <button className="product-btn">Ingredientes</button>
+    </div>
+  );
+}
+```
+
+## Usage Example
+
+### Basic Usage
+
+```jsx
+import ProductCard from "./components/ProductCard/ProductCard";
+
+function MenuGrid() {
+  return (
+    <div className="products-grid">
+      <ProductCard
+        title="Hamburguesa Clásica"
+        price={12.99}
+        image="/images/burger.jpg"
+      />
+    </div>
+  );
+}
+```
+
+### With Badge
+
+```jsx
+<ProductCard
+  title="Hamburguesa Deluxe"
+  price={15.99}
+  image="/images/deluxe-burger.jpg"
+  badge="Popular"
+/>
+```
+
+### From API Data
+
+In the actual application, ProductCard is rendered from API data:
+
+```jsx src/pages/Menu.jsx
+import { useState, useEffect } from "react";
+import ProductCard from "../components/ProductCard/ProductCard";
+import { getProductsByCategory } from "../services/api";
+
+export default function Menu() {
+  const [products, setProducts] = useState([]);
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
+  
+  useEffect(() => {
+    if (activeCategoryId === null) return;
+    
+    getProductsByCategory(activeCategoryId)
+      .then((data) => setProducts(data))
+      .catch((err) => console.error(err));
+  }, [activeCategoryId]);
+  
+  return (
+    <section className="products-grid">
+      {products.map((product) => (
+        <ProductCard
+          key={product.id}
+          title={product.name}
+          price={product.price}
+          image={product.imageUrl}
+          badge={product.badge ?? null}
+        />
+      ))}
+    </section>
+  );
+}
+```
+
+## Structure
+
+The component consists of four main sections:
+
+### 1. Badge (Conditional)
+
+```jsx
+{badge && <div className="badge">{badge}</div>}
+```
+
+Only rendered when the `badge` prop is provided. Positioned absolutely in the top-right corner of the card.
+
+### 2. Product Image
+
+```jsx
+<img src={image} alt={title} />
+```
+
+Displays the product image with the product title as alt text for accessibility.
+
+### 3. Product Info Section
+
+```jsx
+<div className="product-info">
+  <h4>{title}</h4>
+  <span>${price}</span>
+</div>
+```
+
+Contains the product name and price. The price is automatically prefixed with a dollar sign.
+
+### 4. Ingredients Button
+
+```jsx
+<button className="product-btn">Ingredientes</button>
+```
+
+<Note>
+  Currently, the "Ingredientes" button is static and doesn't have an onClick handler. This could be extended to show a modal or expand the card to display ingredients.
+</Note>
+
+## Styling Details
+
+The ProductCard uses CSS classes for styling:
+
+- `.product-card` - Main container with card styling, shadows, and borders
+- `.badge` - Absolute positioned badge in top-right corner
+- `.product-info` - Flex container for title and price
+- `.product-btn` - Styled button at the bottom of the card
+
+## Badge Functionality
+
+The badge feature allows you to highlight special products:
+
+<Tabs>
+  <Tab title="With Badge">
+    ```jsx
+    <ProductCard
+      title="Spicy Burger"
+      price={13.99}
+      image="/spicy.jpg"
+      badge="Picante 🌶️"
+    />
+    ```
+    
+    A small label appears in the top-right corner of the card.
+  </Tab>
+  
+  <Tab title="Without Badge">
+    ```jsx
+    <ProductCard
+      title="Regular Burger"
+      price={11.99}
+      image="/regular.jpg"
+    />
+    ```
+    
+    No badge is displayed, showing a clean card design.
+  </Tab>
+  
+  <Tab title="Null Badge">
+    ```jsx
+    <ProductCard
+      title="Classic Burger"
+      price={12.99}
+      image="/classic.jpg"
+      badge={null}
+    />
+    ```
+    
+    Explicitly passing `null` also results in no badge being displayed.
+  </Tab>
+</Tabs>
+
+## Common Badge Values
+
+Based on the API integration, common badge values might include:
+
+- `"Nuevo"` - New menu items
+- `"Popular"` - Best-selling items
+- `"Picante"` - Spicy dishes
+- `"Vegetariano"` - Vegetarian options
+- `"Especial"` - Daily specials
+
+## Accessibility
+
+The component includes basic accessibility features:
+
+```jsx
+<img src={image} alt={title} />
+```
+
+The image uses the product title as alt text, ensuring screen readers can describe the product to visually impaired users.
+
+<Warning>
+  The ingredients button currently has no functionality. When implementing the onClick handler, ensure it's keyboard accessible and has proper ARIA attributes if it triggers a modal.
+</Warning>
+
+## Layout in Grid
+
+ProductCards are typically displayed in a responsive grid:
+
+```css
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+}
+```
+
+This creates a responsive layout that adapts to different screen sizes.
+
+## Extending the Component
+
+Potential enhancements:
+
+<CardGroup cols={2}>
+  <Card title="Ingredients Modal" icon="list">
+    Add an onClick handler to the button that opens a modal showing ingredients and nutritional information.
+  </Card>
+  
+  <Card title="Add to Cart" icon="cart-shopping">
+    Add functionality to add the product to a shopping cart.
+  </Card>
+  
+  <Card title="Customization" icon="sliders">
+    Allow users to customize toppings or options before adding to cart.
+  </Card>
+  
+  <Card title="Ratings" icon="star">
+    Display customer ratings and reviews.
+  </Card>
+</CardGroup>
+
+## Props Validation
+
+For production use, consider adding PropTypes:
+
+```jsx
+import PropTypes from 'prop-types';
+
+ProductCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  price: PropTypes.number.isRequired,
+  image: PropTypes.string.isRequired,
+  badge: PropTypes.string
+};
+```

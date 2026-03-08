@@ -1,0 +1,585 @@
+---
+title: 'Styling Guide'
+description: 'CSS architecture, styling patterns, and design system in Q-Sopa'
+icon: 'palette'
+---
+
+## Styling Approach
+
+Q-Sopa uses a **component-scoped CSS** approach where each component has its own CSS file co-located in the same directory:
+
+```
+components/
+├── ProductCard/
+│   ├── ProductCard.jsx
+│   └── ProductCard.css  ← Scoped to ProductCard component
+├── Navbar/
+│   ├── Navbar.jsx
+│   └── Navbar.css       ← Scoped to Navbar component
+```
+
+<Info>
+  While Tailwind CSS 4.2.1 is installed as a dependency, the current implementation uses traditional CSS files for styling.
+</Info>
+
+## Global Styles
+
+### Base Styles
+
+Global styles are defined in `src/App.css` (root level) and applied to the entire application:
+
+```css src/App.css
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #121212;
+  color: #f5f5f5;
+}
+```
+
+**Global Design Tokens:**
+- **Primary Font**: Plus Jakarta Sans (loaded from Google Fonts)
+- **Background**: `#121212` (dark theme)
+- **Text Color**: `#f5f5f5` (light gray)
+- **Accent Color**: `#ec1313` (red)
+- **Secondary Accent**: `#FFD60A` (yellow)
+
+### Font Integration
+
+Fonts are loaded in `index.html`:
+
+```html index.html
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+```
+
+<CardGroup cols={2}>
+  <Card title="Plus Jakarta Sans" icon="font">
+    Primary typeface
+    
+    Weights: 400, 500, 700, 800
+  </Card>
+  <Card title="Material Symbols" icon="icons">
+    Icon font for UI elements
+    
+    Outlined style
+  </Card>
+</CardGroup>
+
+## Color System
+
+The application uses a consistent dark theme color palette:
+
+| Purpose | Color | Hex Code |
+|---------|-------|----------|
+| Background Primary | Black | `#121212` |
+| Background Secondary | Dark Gray | `#1E1E1E` |
+| Background Tertiary | Darker Gray | `#1a1a1a` |
+| Border | Gray | `#2a2a2a` |
+| Text Primary | Off-white | `#f5f5f5` |
+| Text Secondary | Light Gray | `#aaa` |
+| Text Muted | Gray | `#888` |
+| Accent Red | Red | `#ec1313` |
+| Accent Red Hover | Dark Red | `#c40b0b` |
+| Accent Yellow | Yellow | `#FFD60A` |
+
+<Note>
+  The red accent color (`#ec1313`) is used consistently for primary actions, active states, and brand identity.
+</Note>
+
+## CSS Class Naming Conventions
+
+The project follows a **BEM-inspired** naming pattern:
+
+```css
+/* Block */
+.navbar
+.product-card
+.category-btn
+
+/* Block with modifier */
+.navbar-wrapper
+.navbar-left
+.navbar-center
+
+/* Element */
+.navbar-logo
+.product-info
+.category-icon
+
+/* State modifier (uses additional class) */
+.category-btn.active
+.drawer-item.active
+```
+
+### Example from ProductCard Component
+
+```css src/components/ProductCard/ProductCard.css
+.product-card {
+  background-color: #1E1E1E;
+  border-radius: 15px;
+  padding: 15px;
+  position: relative;
+  transition: 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+
+.product-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.product-info h4 {
+  margin: 0;
+}
+
+.product-info span {
+  color: #FFD60A;
+  font-weight: bold;
+}
+
+.product-btn {
+  width: 100%;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #ec1313;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.product-btn:hover {
+  background-color: #c40b0b;
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #FFD60A;
+  color: black;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+```
+
+## Material Symbols Icons
+
+Q-Sopa uses Google's Material Symbols for iconography:
+
+```jsx
+<span className="material-symbols-outlined">{cat.icon}</span>
+```
+
+**Icon Usage in Categories Component:**
+
+```jsx src/components/Categories/Categories.jsx
+<div className="category-icon">
+  <span className="material-symbols-outlined">{cat.icon}</span>
+</div>
+```
+
+Corresponding styles:
+
+```css src/components/Categories/Categories.css
+.category-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background-color: #1E1E1E;
+  border: 1px solid #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  transition: 0.3s;
+}
+
+.category-btn.active .category-icon {
+  background-color: #ec1313;
+  color: white;
+  border: none;
+  box-shadow: 0 0 12px rgba(236, 19, 19, 0.3);
+}
+```
+
+<Tip>
+  Icon names are fetched from the API and rendered dynamically. Ensure icon names match Material Symbols naming conventions.
+</Tip>
+
+## Responsive Design Patterns
+
+Q-Sopa implements a mobile-first responsive design with breakpoints:
+
+| Breakpoint | Width | Target Devices |
+|------------|-------|----------------|
+| Mobile | `< 768px` | Phones |
+| Tablet | `768px - 1024px` | Tablets |
+| Desktop | `> 1024px` | Desktops |
+
+### Navbar Responsive Pattern
+
+```css src/components/navbar/Navbar.css
+@media (max-width: 768px) {
+  .navbar {
+    grid-template-columns: 1fr auto;
+    padding: 10px 20px;
+  }
+
+  .order-btn {
+    padding: 8px 20px;
+    font-size: 14px;
+  }
+}
+```
+
+### Grid Layout Adjustments
+
+```css
+.navbar {
+  max-width: 1600px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;  /* Desktop: 3 columns */
+  align-items: center;
+  padding: 15px 40px;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    grid-template-columns: 1fr auto;     /* Mobile: 2 columns */
+    padding: 10px 20px;
+  }
+}
+```
+
+## Mobile Drawer Implementation
+
+The Categories component features a sophisticated mobile drawer pattern:
+
+### Desktop View
+
+Horizontal scrollable category list:
+
+```css src/components/Categories/Categories.css
+.categories-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.categories-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.categories-container {
+  display: flex;
+  gap: 18px;
+}
+```
+
+### Mobile View
+
+Hamburger menu with slide-in drawer:
+
+```css
+@media (max-width: 768px) {
+  /* Hide desktop menu */
+  .categories-wrapper,
+  .categories-container {
+    display: none;
+  }
+
+  /* Hamburger button */
+  .drawer-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  /* Dark overlay */
+  .drawer-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(3px);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .drawer-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Slide-in panel */
+  .drawer-panel {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    background: #1a1a1a;
+    border-right: 1px solid #2a2a2a;
+    z-index: 101;
+    flex-direction: column;
+    padding: 72px 12px 32px;
+    gap: 4px;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .drawer-panel.open {
+    transform: translateX(0);
+  }
+}
+```
+
+<Steps>
+  <Step title="Hamburger Button">
+    Three-line icon that opens the drawer
+  </Step>
+  <Step title="Dark Overlay">
+    Backdrop with blur effect that closes drawer when clicked
+  </Step>
+  <Step title="Slide-in Panel">
+    Left-side panel with smooth transform animation
+  </Step>
+</Steps>
+
+### Drawer JSX Structure
+
+```jsx src/components/Categories/Categories.jsx
+<>
+  {/* Desktop: horizontal menu */}
+  <div className="categories-wrapper">
+    <div className="categories-container">
+      {categories.map((cat) => (
+        <button className="category-btn">{/* ... */}</button>
+      ))}
+    </div>
+  </div>
+
+  {/* Mobile: hamburger button */}
+  <button
+    className="drawer-toggle"
+    onClick={() => setDrawerOpen(true)}
+  >
+    <span />
+    <span />
+    <span />
+  </button>
+
+  {/* Mobile: overlay */}
+  <div
+    className={`drawer-overlay ${drawerOpen ? "open" : ""}`}
+    onClick={() => setDrawerOpen(false)}
+  />
+
+  {/* Mobile: drawer panel */}
+  <nav className={`drawer-panel ${drawerOpen ? "open" : ""}`}>
+    <span className="drawer-title">Categorías</span>
+    {categories.map((cat) => (
+      <button className="drawer-item">{/* ... */}</button>
+    ))}
+  </nav>
+</>
+```
+
+<Warning>
+  The drawer implementation requires both CSS media queries and JavaScript state management to work correctly. Don't forget to implement the keyboard escape handler for accessibility.
+</Warning>
+
+## Animation and Transitions
+
+Smooth transitions enhance the user experience:
+
+### Hover Effects
+
+```css
+.product-card {
+  transition: 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.category-icon {
+  transition: 0.3s;
+}
+
+.category-btn:hover .category-icon {
+  border-color: #ec1313;
+  color: #ec1313;
+  transform: scale(1.06);
+}
+```
+
+### Button Transitions
+
+```css
+.product-btn {
+  background-color: #ec1313;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.product-btn:hover {
+  background-color: #c40b0b;
+}
+```
+
+### Drawer Animation
+
+```css
+.drawer-panel {
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-panel.open {
+  transform: translateX(0);
+}
+```
+
+<Tip>
+  Use cubic-bezier easing functions for more natural, polished animations. The drawer uses `cubic-bezier(0.4, 0, 0.2, 1)` for a smooth deceleration effect.
+</Tip>
+
+## Layout Patterns
+
+### Sticky Navigation
+
+```css src/components/navbar/Navbar.css
+.navbar-wrapper {
+  width: 100%;
+  background-color: #121212;
+  border-bottom: 1px solid #2a2a2a;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+```
+
+### Centered Content Container
+
+```css
+.navbar {
+  max-width: 1600px;
+  margin: auto;
+  padding: 15px 40px;
+}
+```
+
+### Flexbox Patterns
+
+```css
+/* Space-between layout */
+.product-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/* Centered icon container */
+.category-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+```
+
+### Grid System
+
+```css
+.navbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+```
+
+## Image Optimization
+
+Consistent image sizing with `object-fit`:
+
+```css
+.product-card img {
+  width: 100%;
+  height: 200px;        /* Fixed height */
+  object-fit: cover;    /* Crop without distortion */
+  border-radius: 10px;
+  display: block;
+}
+
+.navbar-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ec1313;
+  box-shadow: 0 0 15px rgba(236, 19, 19, 0.4);
+}
+```
+
+<Info>
+  Using `object-fit: cover` ensures images maintain their aspect ratio while filling their containers, preventing distortion.
+</Info>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Scoped Styles" icon="file-code">
+    Keep CSS files co-located with their components
+  </Card>
+  <Card title="BEM Naming" icon="text">
+    Use consistent, descriptive class names
+  </Card>
+  <Card title="Transitions" icon="wand-magic-sparkles">
+    Add smooth transitions for interactive elements
+  </Card>
+  <Card title="Responsive" icon="mobile">
+    Test all breakpoints and implement mobile patterns
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Development Setup" icon="code" href="/development/setup">
+    Set up your development environment
+  </Card>
+  <Card title="Project Structure" icon="folder-tree" href="/development/structure">
+    Understand the codebase organization
+  </Card>
+</CardGroup>

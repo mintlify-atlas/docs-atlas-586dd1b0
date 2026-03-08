@@ -1,0 +1,514 @@
+---
+title: 'Customization Guide'
+description: 'Learn how to customize Q-Sopa to match your restaurant brand and requirements'
+icon: 'palette'
+---
+
+## Overview
+
+Q-Sopa is designed to be highly customizable. This guide covers common customization scenarios with real code examples from the project.
+
+## API Configuration
+
+The API base URL is configured in `src/services/api.js`.
+
+### Changing the API Endpoint
+
+<Steps>
+  <Step title="Locate the API configuration">
+    Open `src/services/api.js` in your editor.
+  </Step>
+  
+  <Step title="Update the BASE_URL">
+    Modify the `BASE_URL` constant to point to your API:
+    
+    ```javascript
+    // Before
+    const BASE_URL = "https://apiqsp-production.up.railway.app";
+    
+    // After
+    const BASE_URL = "https://your-api-domain.com";
+    ```
+  </Step>
+  
+  <Step title="Test the connection">
+    Run your development server and verify the API calls work:
+    
+    ```bash
+    npm run dev
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  The API must support the following endpoints:
+  - `GET /categories` - Returns list of categories
+  - `GET /products` - Returns all products
+  - `GET /products/category/:id` - Returns products for a specific category
+</Note>
+
+### Environment Variables (Recommended)
+
+For better configuration management, use environment variables:
+
+```javascript
+// src/services/api.js
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://apiqsp-production.up.railway.app";
+
+export const getCategorias = async () => {
+  const res = await fetch(`${BASE_URL}/categories`);
+  if (!res.ok) throw new Error("Error al cargar categorías");
+  return res.json();
+};
+```
+
+Create a `.env` file in your project root:
+
+```bash
+VITE_API_BASE_URL=https://your-api-domain.com
+```
+
+<Warning>
+  Never commit `.env` files containing sensitive data to version control. Add `.env` to your `.gitignore` file.
+</Warning>
+
+## Branding and Colors
+
+### Primary Brand Color
+
+The primary red color (`#ec1313`) is used throughout the application. To change it:
+
+<AccordionGroup>
+  <Accordion title="Product Card Button">
+    Update `src/components/ProductCard/ProductCard.css`:
+    
+    ```css
+    /* Current: Red theme */
+    .product-btn {
+      background-color: #ec1313;
+    }
+    
+    .product-btn:hover {
+      background-color: #c40b0b;
+    }
+    
+    /* Example: Blue theme */
+    .product-btn {
+      background-color: #1E90FF;
+    }
+    
+    .product-btn:hover {
+      background-color: #1873CC;
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Category Selection">
+    Update `src/components/Categories/Categories.css`:
+    
+    ```css
+    /* Desktop active state */
+    .category-btn.active .category-icon {
+      background-color: #ec1313; /* Change this */
+      box-shadow: 0 0 12px rgba(236, 19, 19, 0.3);
+    }
+    
+    .category-btn.active .category-underline {
+      background-color: #ec1313; /* Change this */
+    }
+    
+    /* Mobile drawer active state */
+    .drawer-item.active {
+      background: rgba(236, 19, 19, 0.1); /* Change this */
+      border-color: rgba(236, 19, 19, 0.3);
+    }
+    
+    .drawer-item.active .drawer-item-icon {
+      background: #ec1313; /* Change this */
+      border-color: #ec1313;
+      box-shadow: 0 4px 14px rgba(236, 19, 19, 0.35);
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Logo Border">
+    Update `src/components/navbar/Navbar.css`:
+    
+    ```css
+    .navbar-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #ec1313; /* Change this */
+      box-shadow: 0 0 15px rgba(236, 19, 19, 0.4);
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Accent Color (Yellow)
+
+The yellow accent color (`#FFD60A`) is used for prices and highlights:
+
+```css
+/* src/components/ProductCard/ProductCard.css */
+.product-info span {
+  color: #FFD60A; /* Price color */
+  font-weight: bold;
+}
+
+/* src/pages/Menu.css */
+.menu-subtitle {
+  color: #FFD60A; /* "Sabores Auténticos" text */
+  font-weight: bold;
+}
+```
+
+### Background Colors
+
+Q-Sopa uses a dark theme with these background layers:
+
+```css
+/* Main background - src/App.css */
+body {
+  background-color: #121212;
+  color: #f5f5f5;
+}
+
+/* Card background - src/components/ProductCard/ProductCard.css */
+.product-card {
+  background-color: #1E1E1E;
+  border-radius: 15px;
+}
+
+/* Category icon background */
+.category-icon {
+  background-color: #1E1E1E;
+  border: 1px solid #2a2a2a;
+}
+```
+
+<Tip>
+  Maintain sufficient contrast ratios for accessibility. Use tools like [WebAIM's Contrast Checker](https://webaim.org/resources/contrastchecker/) to verify your color choices.
+</Tip>
+
+## Component Customization
+
+### Product Card Layout
+
+The ProductCard component is defined in `src/components/ProductCard/ProductCard.jsx`:
+
+<AccordionGroup>
+  <Accordion title="Adding a Description Field">
+    ```jsx
+    // src/components/ProductCard/ProductCard.jsx
+    export default function ProductCard({ title, price, image, badge, description }) {
+      return (
+        <div className="product-card">
+          {badge && <div className="badge">{badge}</div>}
+          <img src={image} alt={title} />
+          
+          <div className="product-info">
+            <h4>{title}</h4>
+            <span>${price}</span>
+          </div>
+          
+          {/* Add description */}
+          {description && <p className="product-description">{description}</p>}
+          
+          <button className="product-btn">Ingredientes</button>
+        </div>
+      );
+    }
+    ```
+    
+    Add corresponding CSS in `ProductCard.css`:
+    
+    ```css
+    .product-description {
+      color: #aaa;
+      font-size: 13px;
+      margin: 8px 0;
+      line-height: 1.4;
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Changing Image Dimensions">
+    Current dimensions in `src/components/ProductCard/ProductCard.css`:
+    
+    ```css
+    .product-card img {
+      width: 100%;
+      height: 200px;        /* Fixed height */
+      object-fit: cover;    /* Prevents distortion */
+      border-radius: 10px;
+      display: block;
+    }
+    ```
+    
+    For larger images:
+    
+    ```css
+    .product-card img {
+      height: 280px; /* Increase as needed */
+    }
+    ```
+    
+    For aspect ratio instead of fixed height:
+    
+    ```css
+    .product-card img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 10px;
+      display: block;
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Customizing the Button">
+    Change the "Ingredientes" button text or functionality:
+    
+    ```jsx
+    // Add onClick handler
+    export default function ProductCard({ title, price, image, badge, onViewDetails }) {
+      return (
+        <div className="product-card">
+          {/* ... */}
+          <button 
+            className="product-btn"
+            onClick={() => onViewDetails({ title, price, image })}
+          >
+            View Details
+          </button>
+        </div>
+      );
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Grid Layout
+
+The products grid is defined in `src/pages/Menu.css`:
+
+```css
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+```
+
+**Customization options:**
+
+```css
+/* More columns (smaller cards) */
+.products-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* Fewer columns (larger cards) */
+.products-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+/* Fixed 3 columns on desktop */
+.products-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Larger gap */
+.products-grid {
+  gap: 40px;
+}
+```
+
+## Category Icons
+
+Q-Sopa uses [Material Symbols](https://fonts.google.com/icons) for category icons. The icons are rendered in `src/components/Categories/Categories.jsx`:
+
+```jsx
+<span className="material-symbols-outlined">{cat.icon}</span>
+```
+
+### Adding New Icon Support
+
+Icons are provided by your API's `categories` endpoint. Each category should include an `icon` field:
+
+```json
+{
+  "id": 1,
+  "name": "Burgers",
+  "icon": "lunch_dining"
+}
+```
+
+<Tip>
+  Browse available icons at [Google Fonts Icons](https://fonts.google.com/icons?icon.set=Material+Symbols). Use the icon name exactly as shown (e.g., `lunch_dining`, `local_pizza`, `restaurant`).
+</Tip>
+
+### Icon Styling
+
+Customize icon appearance in `Categories.css`:
+
+```css
+/* Desktop icons */
+.category-icon {
+  width: 48px;
+  height: 48px;
+  font-size: 22px; /* Icon size */
+  border-radius: 14px;
+}
+
+/* Mobile drawer icons */
+.drawer-item-icon {
+  width: 38px;
+  height: 38px;
+  font-size: 18px; /* Icon size */
+}
+```
+
+## Menu Header Content
+
+Customize the header text in `src/pages/Menu.jsx`:
+
+```jsx
+<header className="menu-header">
+  <span className="menu-subtitle">Sabores Auténticos</span>
+  <h2>Nuestro Menú</h2>
+  <p>Ingredientes premium, preparados al momento.</p>
+</header>
+```
+
+**Example customization:**
+
+```jsx
+<header className="menu-header">
+  <span className="menu-subtitle">Fresh Daily</span>
+  <h2>Our Menu</h2>
+  <p>Farm-to-table ingredients, made with love.</p>
+</header>
+```
+
+## Logo Customization
+
+Replace the logo in `src/components/navbar/Navbar.jsx`:
+
+```jsx
+import logo from "../../assets/logo_Q-spoa.jpg";
+
+// In the component:
+<img src={logo} alt="Burger Bistro Logo" className="navbar-logo" />
+```
+
+<Steps>
+  <Step title="Add your logo">
+    Place your logo file in the `src/assets/` directory (e.g., `my-logo.png`).
+  </Step>
+  
+  <Step title="Update the import">
+    ```jsx
+    import logo from "../../assets/my-logo.png";
+    ```
+  </Step>
+  
+  <Step title="Update the alt text">
+    ```jsx
+    <img src={logo} alt="Your Restaurant Name" className="navbar-logo" />
+    ```
+  </Step>
+</Steps>
+
+## Font Customization
+
+The application uses 'Plus Jakarta Sans' font, defined in `src/App.css`:
+
+```css
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: #121212;
+  color: #f5f5f5;
+}
+```
+
+To use a different font:
+
+1. **Google Fonts:** Add to `index.html`:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+```
+
+2. **Update CSS:**
+
+```css
+body {
+  font-family: 'Inter', sans-serif;
+}
+```
+
+## Advanced: Adding New Features
+
+### Search Functionality
+
+Add a search bar to filter products:
+
+```jsx
+// In src/pages/Menu.jsx
+const [searchTerm, setSearchTerm] = useState("");
+
+const filteredProducts = products.filter(product =>
+  product.name.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+// In the render:
+<input
+  type="text"
+  placeholder="Search products..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  className="menu-search"
+/>
+
+<section className="products-grid">
+  {filteredProducts.map((product) => (
+    <ProductCard key={product.id} {...product} />
+  ))}
+</section>
+```
+
+### Price Formatting
+
+Add custom price formatting:
+
+```jsx
+// Create src/utils/format.js
+export const formatPrice = (price) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(price);
+};
+
+// In ProductCard.jsx
+import { formatPrice } from '../../utils/format';
+
+<span>{formatPrice(price)}</span>
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Deployment" icon="rocket" href="/guides/deployment">
+    Learn how to deploy your customized application
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Fix common issues and errors
+  </Card>
+</CardGroup>

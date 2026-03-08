@@ -1,0 +1,370 @@
+---
+title: 'Project Structure'
+description: 'Understanding the Q-Sopa codebase organization and file structure'
+icon: 'folder-tree'
+---
+
+## Directory Overview
+
+Q-Sopa follows a standard React application structure with clear separation of concerns:
+
+```
+q-sopa/
+├── public/              # Static assets
+├── src/                 # Source code
+│   ├── assets/         # Images and media files
+│   ├── components/     # Reusable React components
+│   ├── pages/          # Page-level components
+│   ├── services/       # API and external services
+│   ├── App.jsx         # Root application component
+│   ├── App.css         # Root application styles
+│   ├── main.jsx        # Application entry point
+│   └── index.css       # Global styles
+├── index.html          # HTML template
+├── package.json        # Dependencies and scripts
+├── vite.config.js      # Vite configuration
+└── eslint.config.js    # ESLint configuration
+```
+
+## Source Directory Structure
+
+### Entry Points
+
+<CardGroup cols={2}>
+  <Card title="main.jsx" icon="door-open">
+    Application bootstrap and React root rendering
+  </Card>
+  <Card title="App.jsx" icon="react">
+    Root component that loads the main page
+  </Card>
+</CardGroup>
+
+#### main.jsx
+
+The entry point that initializes the React application:
+
+```jsx src/main.jsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+```
+
+**Key Features:**
+- Uses React 19's `createRoot` API
+- Wraps app in `StrictMode` for development warnings
+- Imports global styles before components
+
+#### App.jsx
+
+The root application component:
+
+```jsx src/App.jsx
+import Menu from "./pages/Menu";
+import "./App.css";
+
+function App() {
+  return <Menu />;
+}
+
+export default App
+```
+
+<Info>
+  Currently, the app renders only the Menu page. This structure allows for easy expansion to multiple pages with routing.
+</Info>
+
+### Components Directory
+
+Reusable UI components are organized in `src/components/` with a consistent structure:
+
+```
+components/
+├── Categories/
+│   ├── Categories.jsx
+│   └── Categories.css
+├── LogoSplash/
+│   ├── LogoSplash.jsx
+│   └── LogoSplash.css
+├── ProductCard/
+│   ├── ProductCard.jsx
+│   └── ProductCard.css
+├── navbar/
+│   ├── Navbar.jsx
+│   └── Navbar.css
+└── footer/
+    ├── footer.jsx
+    └── footer.css
+```
+
+<Note>
+  Each component follows the **component-scoped CSS** pattern where styles are co-located with their components.
+</Note>
+
+#### Component Examples
+
+**Navbar Component** (`src/components/navbar/Navbar.jsx`):
+
+```jsx
+import "./Navbar.css";
+import logo from "../../assets/logo_Q-spoa.jpg";
+import Categories from "../Categories/Categories";
+
+export default function Navbar({ onCategoryChange }) {
+  return (
+    <header className="navbar-wrapper">
+      <div className="navbar">
+        {/* Logo */}
+        <div className="navbar-left">
+          <a href="#">
+            <img src={logo} alt="Burger Bistro Logo" className="navbar-logo" />
+          </a>
+        </div>
+
+        {/* Categories */}
+        <div className="navbar-center">
+          <Categories onCategoryChange={onCategoryChange} />
+        </div>
+      </div>
+    </header>
+  );
+}
+```
+
+**ProductCard Component** (`src/components/ProductCard/ProductCard.jsx`):
+
+```jsx
+import "./ProductCard.css";
+
+export default function ProductCard({ title, price, image, badge }) {
+  return (
+    <div className="product-card">
+      {badge && <div className="badge">{badge}</div>}
+      <img src={image} alt={title} />
+      <div className="product-info">
+        <h4>{title}</h4>
+        <span>${price}</span>
+      </div>
+      <button className="product-btn">Ingredientes</button>
+    </div>
+  );
+}
+```
+
+### Pages Directory
+
+Page-level components that represent full views:
+
+```
+pages/
+├── Menu.jsx
+└── Menu.css
+```
+
+**Menu Page** (`src/pages/Menu.jsx`):
+
+```jsx
+import { useState, useEffect } from "react";
+import Navbar from "../components/navbar/Navbar";
+import Footer from "../components/footer/footer";
+import ProductCard from "../components/ProductCard/ProductCard";
+import LogoSplash from "../components/LogoSplash/LogoSplash";
+import { getProductsByCategory } from "../services/api";
+import "./Menu.css";
+
+export default function Menu() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
+
+  const handleCategoryChange = (categoryId) => {
+    setActiveCategoryId(categoryId);
+  };
+
+  useEffect(() => {
+    if (activeCategoryId === null) return;
+
+    setLoading(true);
+    setError(null);
+
+    getProductsByCategory(activeCategoryId)
+      .then((data) => setProducts(data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [activeCategoryId]);
+
+  return (
+    <>
+      <Navbar onCategoryChange={handleCategoryChange} />
+      <main className="menu-container">
+        {/* Content rendering logic */}
+      </main>
+      <Footer />
+    </>
+  );
+}
+```
+
+**Key Patterns:**
+- Uses React Hooks for state management (`useState`, `useEffect`)
+- Implements data fetching with loading and error states
+- Conditional rendering based on application state
+
+### Services Directory
+
+API and external service integrations:
+
+```
+services/
+└── api.js
+```
+
+**API Service** (`src/services/api.js`):
+
+```javascript
+const BASE_URL = "https://apiqsp-production.up.railway.app";
+
+export const getCategorias = async () => {
+  const res = await fetch(`${BASE_URL}/categories`);
+  if (!res.ok) throw new Error("Error al cargar categorías");
+  return res.json();
+};
+
+export const getComidas = async () => {
+  const res = await fetch(`${BASE_URL}/products`);
+  if (!res.ok) throw new Error("Error al cargar comidas");
+  return res.json();
+};
+
+export const getProductsByCategory = async (categoryId) => {
+  const res = await fetch(`${BASE_URL}/products/category/${categoryId}`);
+  if (!res.ok) throw new Error("Error al cargar productos de la categoría");
+  return res.json();
+};
+```
+
+<Tip>
+  All API calls are centralized in the services directory, making it easy to update endpoints or add new API integrations.
+</Tip>
+
+### Assets Directory
+
+Static assets like images and logos:
+
+```
+assets/
+├── logo_Q-spoa.jpg
+└── react.svg
+```
+
+Assets are imported directly in components:
+
+```jsx
+import logo from "../../assets/logo_Q-spoa.jpg";
+```
+
+## Naming Conventions
+
+### File Naming
+
+<CardGroup cols={2}>
+  <Card title="Components" icon="puzzle-piece">
+    PascalCase for component files
+    
+    `ProductCard.jsx`, `Navbar.jsx`
+  </Card>
+  <Card title="Styles" icon="paintbrush">
+    Match component name
+    
+    `ProductCard.css`, `Navbar.css`
+  </Card>
+  <Card title="Services" icon="server">
+    camelCase for utility files
+    
+    `api.js`, `helpers.js`
+  </Card>
+  <Card title="Pages" icon="file">
+    PascalCase for page components
+    
+    `Menu.jsx`, `Home.jsx`
+  </Card>
+</CardGroup>
+
+### CSS Class Naming
+
+The project uses **BEM-inspired** (Block Element Modifier) naming:
+
+```css
+.navbar-wrapper       /* Block */
+.navbar-left          /* Block with location modifier */
+.navbar-logo          /* Element */
+.category-btn         /* Block */
+.category-btn.active  /* Block with state modifier */
+```
+
+### Component Export Pattern
+
+All components use **default exports**:
+
+```jsx
+export default function ComponentName() {
+  // component logic
+}
+```
+
+Services use **named exports**:
+
+```javascript
+export const getCategorias = async () => { /* ... */ };
+export const getProductsByCategory = async () => { /* ... */ };
+```
+
+## Component Architecture Patterns
+
+### Container/Presentational Pattern
+
+- **Pages** act as containers managing state and data fetching
+- **Components** are presentational, receiving data via props
+
+### State Management
+
+<Steps>
+  <Step title="Local State">
+    Uses React's `useState` for component-level state
+  </Step>
+  <Step title="Side Effects">
+    Manages side effects with `useEffect` for data fetching
+  </Step>
+  <Step title="Props Drilling">
+    Passes callbacks and data through props (no global state library yet)
+  </Step>
+</Steps>
+
+### Responsive Design
+
+Components implement responsive behavior through:
+- CSS media queries
+- Conditional rendering (desktop vs mobile)
+- Mobile-first drawer navigation pattern
+
+<Warning>
+  The Categories component implements a sophisticated mobile drawer that shows on screens below 768px. See the [Styling Guide](/development/styling) for implementation details.
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Development Setup" icon="code" href="/development/setup">
+    Set up your development environment
+  </Card>
+  <Card title="Styling Guide" icon="palette" href="/development/styling">
+    Learn about CSS patterns and styling approach
+  </Card>
+</CardGroup>

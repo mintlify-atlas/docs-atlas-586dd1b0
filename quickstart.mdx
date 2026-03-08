@@ -1,80 +1,377 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get Q-Sopa up and running in minutes
 ---
 
-## Get started in three steps
+# Quick Start Guide
 
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+Get Q-Sopa running on your local machine in just a few minutes. This guide will walk you through cloning the repository, installing dependencies, and starting the development server.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+**Prerequisites**: Make sure you have [Node.js](https://nodejs.org/) version 16 or higher installed on your machine. You can check your version with `node --version`.
 </Note>
+
+## Installation
+
+<Steps>
+  <Step title="Clone the Repository">
+    First, clone the Q-Sopa repository to your local machine:
+    
+    ```bash
+    git clone <repository-url>
+    cd q-sopa
+    ```
+  </Step>
+
+  <Step title="Install Dependencies">
+    Install all required dependencies using your preferred package manager:
+    
+    <CodeGroup>
+      ```bash npm
+      npm install
+      ```
+      
+      ```bash yarn
+      yarn install
+      ```
+      
+      ```bash pnpm
+      pnpm install
+      ```
+    </CodeGroup>
+    
+    This will install:
+    - React 19.2.0
+    - React DOM 19.2.0
+    - Vite 7.3.1
+    - ESLint and related plugins
+  </Step>
+
+  <Step title="Start the Development Server">
+    Launch the Vite development server with hot module replacement:
+    
+    <CodeGroup>
+      ```bash npm
+      npm run dev
+      ```
+      
+      ```bash yarn
+      yarn dev
+      ```
+      
+      ```bash pnpm
+      pnpm dev
+      ```
+    </CodeGroup>
+    
+    The application will start at `http://localhost:5173` (or another port if 5173 is in use).
+  </Step>
+
+  <Step title="Open in Browser">
+    Open your web browser and navigate to the URL shown in your terminal (typically `http://localhost:5173`).
+    
+    You should see the Q-Sopa menu application with the animated logo splash screen!
+  </Step>
+</Steps>
+
+## Configuration
+
+### API Configuration
+
+The application is pre-configured to use the production API hosted on Railway. The API base URL is set in `src/services/api.js`:
+
+```javascript src/services/api.js
+const BASE_URL = "https://apiqsp-production.up.railway.app";
+```
+
+<Warning>
+**Using a Different API?** If you need to point to a local or different API endpoint, modify the `BASE_URL` constant in `src/services/api.js`.
+</Warning>
+
+### Environment Variables (Optional)
+
+For more flexible configuration, you can create a `.env` file in the project root:
+
+```bash .env
+VITE_API_URL=https://apiqsp-production.up.railway.app
+```
+
+Then update `src/services/api.js` to use the environment variable:
+
+```javascript src/services/api.js
+const BASE_URL = import.meta.env.VITE_API_URL || "https://apiqsp-production.up.railway.app";
+```
+
+<Info>
+Vite exposes environment variables prefixed with `VITE_` to your client-side code via `import.meta.env`.
+</Info>
+
+## Project Scripts
+
+Q-Sopa includes several npm scripts defined in `package.json`:
+
+```json package.json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  }
+}
+```
+
+### Available Commands
+
+<CardGroup cols={2}>
+  <Card title="Development Server" icon="code">
+    ```bash
+    npm run dev
+    ```
+    Starts Vite dev server with HMR at `http://localhost:5173`
+  </Card>
+  
+  <Card title="Build for Production" icon="hammer">
+    ```bash
+    npm run build
+    ```
+    Creates optimized production build in `dist/` directory
+  </Card>
+  
+  <Card title="Lint Code" icon="check">
+    ```bash
+    npm run lint
+    ```
+    Runs ESLint to check code quality and style
+  </Card>
+  
+  <Card title="Preview Build" icon="eye">
+    ```bash
+    npm run preview
+    ```
+    Previews production build locally
+  </Card>
+</CardGroup>
+
+## First-Time Setup Walkthrough
+
+### Understanding the Initial State
+
+When you first load the application, you'll see:
+
+1. **Navigation Bar**: Displays the Q-Sopa logo and category navigation
+2. **Logo Splash Screen**: Animated ripple effect with the logo
+3. **Call-to-Action**: Text prompting you to "Selecciona una categoría para ver el menú"
+4. **Footer**: Copyright information
+
+This is the default state when no category is selected, as defined in `src/pages/Menu.jsx`:
+
+```jsx src/pages/Menu.jsx
+export default function Menu() {
+  const [products, setProducts] = useState([]);
+  const [activeCategoryId, setActiveCategoryId] = useState(null); // null = sin categoría
+
+  // ...
+
+  return (
+    <>
+      <Navbar
+        onCategoryChange={handleCategoryChange}
+        onLogoClick={handleLogoClick}
+      />
+
+      <main className="menu-container">
+        {/* Sin categoría → LogoSplash */}
+        {activeCategoryId === null && <LogoSplash />}
+        
+        {/* Products display when category is selected */}
+      </main>
+
+      <Footer />
+    </>
+  );
+}
+```
+
+### Exploring the Application
+
+<Steps>
+  <Step title="Select a Category">
+    Click on any category button in the navigation bar (e.g., hamburgers, pizzas, bebidas). On mobile, tap the hamburger menu icon to open the category drawer.
+  </Step>
+
+  <Step title="View Products">
+    The application will:
+    1. Show a loading spinner
+    2. Fetch products from the API
+    3. Display product cards in a responsive grid
+    
+    Each product card shows:
+    - Product image
+    - Product name
+    - Price
+    - Optional badge (if present)
+    - "Ingredientes" button
+  </Step>
+
+  <Step title="Switch Categories">
+    Click different category buttons to see different products. The active category is highlighted with a visual indicator.
+  </Step>
+
+  <Step title="Return to Home">
+    Click the Q-Sopa logo in the navigation bar to return to the splash screen.
+  </Step>
+</Steps>
+
+## Development Workflow
+
+### Hot Module Replacement (HMR)
+
+Vite provides instant HMR, meaning your changes appear in the browser without a full page reload:
+
+```jsx src/components/ProductCard/ProductCard.jsx
+export default function ProductCard({ title, price, image, badge }) {
+  return (
+    <div className="product-card">
+      {badge && <div className="badge">{badge}</div>}
+      <img src={image} alt={title} />
+      <div className="product-info">
+        <h4>{title}</h4>
+        <span>${price}</span>
+      </div>
+      <button className="product-btn">Ingredientes</button>
+    </div>
+  );
+}
+```
+
+<Tip>
+Try modifying the button text in `ProductCard.jsx` - your changes will appear instantly in the browser!
+</Tip>
+
+### Project Entry Point
+
+The application bootstraps from `src/main.jsx`:
+
+```jsx src/main.jsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+```
+
+React 19's `StrictMode` helps identify potential problems in the application during development.
+
+### Application Root
+
+The `App` component simply renders the `Menu` page:
+
+```jsx src/App.jsx
+import Menu from "./pages/Menu";
+import "./App.css";
+
+function App() {
+  return <Menu />;
+}
+
+export default App
+```
+
+## Building for Production
+
+<Steps>
+  <Step title="Create Production Build">
+    Run the build command:
+    
+    ```bash
+    npm run build
+    ```
+    
+    This creates an optimized build in the `dist/` directory.
+  </Step>
+
+  <Step title="Preview the Build">
+    Test the production build locally:
+    
+    ```bash
+    npm run preview
+    ```
+  </Step>
+
+  <Step title="Deploy">
+    Deploy the contents of the `dist/` directory to your hosting provider (Vercel, Netlify, Railway, etc.).
+  </Step>
+</Steps>
+
+### Build Output
+
+Vite optimizes your application with:
+- **Code splitting**: Separate chunks for better caching
+- **Minification**: Smaller file sizes
+- **Tree shaking**: Remove unused code
+- **Asset optimization**: Optimized images and CSS
+
+## Troubleshooting
+
+### Port Already in Use
+
+If port 5173 is already in use, Vite will automatically try the next available port. You can also specify a custom port:
+
+```javascript vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 3000
+  }
+})
+```
+
+### API Connection Issues
+
+If you see error messages about loading categories or products:
+
+1. Check your internet connection
+2. Verify the API URL in `src/services/api.js`
+3. Check the browser console for detailed error messages
+4. Ensure the API server is running
+
+### Missing Material Symbols
+
+If category icons don't appear, verify that the Material Symbols stylesheet is loaded in `index.html`:
+
+```html index.html
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Explore Components" icon="cube" href="/components/overview">
+    Deep dive into each component's implementation
+  </Card>
+  
+  <Card title="API Integration" icon="cloud" href="/api/overview">
+    Learn how data flows through the application
+  </Card>
+  
+  <Card title="Styling Guide" icon="paintbrush" href="/development/styling">
+    Understand the CSS architecture and customize styles
+  </Card>
+  
+  <Card title="Customization" icon="wrench" href="/guides/customization">
+    Learn how to customize and extend Q-Sopa
+  </Card>
+</CardGroup>
+
+<Tip>
+**Ready to customize?** Start by exploring the component files in `src/components/` - each component is self-contained with its own CSS file for easy modification.
+</Tip>

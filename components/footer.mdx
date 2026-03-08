@@ -1,0 +1,359 @@
+---
+title: Footer Component
+description: Simple footer with copyright information for the Q-Sopa restaurant
+---
+
+## Overview
+
+The Footer component is a minimalist footer that displays copyright information at the bottom of the application. It's a purely presentational component with no interactivity or props.
+
+## Location
+
+```
+src/components/footer/footer.jsx
+src/components/footer/footer.css
+```
+
+## Props
+
+This component does not accept any props.
+
+## Source Code
+
+```jsx src/components/footer/footer.jsx
+import "./footer.css";
+
+export default function Footer() {
+  return (
+    <footer className="footer">
+      © 2023 Q sopa todos los derechos reservados.
+    </footer>
+  );
+}
+```
+
+## Usage Example
+
+### Basic Usage
+
+The Footer is typically placed at the bottom of the main application layout:
+
+```jsx src/pages/Menu.jsx
+import Navbar from "../components/navbar/Navbar";
+import Footer from "../components/footer/footer";
+
+export default function Menu() {
+  return (
+    <>
+      <Navbar />
+      
+      <main className="menu-container">
+        {/* Main content */}
+      </main>
+      
+      <Footer />
+    </>
+  );
+}
+```
+
+### In App Layout
+
+```jsx
+import Footer from "./components/footer/footer";
+
+function App() {
+  return (
+    <div className="app-wrapper">
+      {/* Header */}
+      {/* Main content */}
+      <Footer />
+    </div>
+  );
+}
+```
+
+## Content and Structure
+
+The component consists of a single `<footer>` element containing copyright text:
+
+```
+© 2023 Q sopa todos los derechos reservados.
+```
+
+**Translation**: © 2023 Q sopa all rights reserved.
+
+## Styling
+
+The Footer uses a single CSS class:
+
+```css
+.footer {
+  /* Typically includes: */
+  /* - Background color */
+  /* - Text alignment (center) */
+  /* - Padding */
+  /* - Border or shadow */
+  /* - Fixed/sticky positioning (optional) */
+}
+```
+
+The exact styling is defined in `footer.css`.
+
+## Simple Implementation
+
+The Footer demonstrates React best practices for simple presentational components:
+
+<CardGroup cols={2}>
+  <Card title="Single Responsibility" icon="bullseye">
+    The component has one job: display copyright information.
+  </Card>
+  
+  <Card title="No State" icon="circle-xmark">
+    Being stateless makes it predictable and easy to test.
+  </Card>
+  
+  <Card title="No Props" icon="ban">
+    The content is static, requiring no external data.
+  </Card>
+  
+  <Card title="Minimal Code" icon="code">
+    Only 9 lines of code including imports and formatting.
+  </Card>
+</CardGroup>
+
+## Customization Options
+
+While the current implementation is static, here are common ways to extend it:
+
+### Dynamic Year
+
+```jsx
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
+  
+  return (
+    <footer className="footer">
+      © {currentYear} Q sopa todos los derechos reservados.
+    </footer>
+  );
+}
+```
+
+### With Links
+
+```jsx
+export default function Footer() {
+  return (
+    <footer className="footer">
+      <p>© 2023 Q sopa todos los derechos reservados.</p>
+      <nav className="footer-links">
+        <a href="/privacy">Privacidad</a>
+        <a href="/terms">Términos</a>
+        <a href="/contact">Contacto</a>
+      </nav>
+    </footer>
+  );
+}
+```
+
+### With Social Media
+
+```jsx
+export default function Footer() {
+  return (
+    <footer className="footer">
+      <div className="footer-content">
+        <p>© 2023 Q sopa todos los derechos reservados.</p>
+        <div className="social-links">
+          <a href="https://facebook.com/qsopa" aria-label="Facebook">
+            <i className="fab fa-facebook"></i>
+          </a>
+          <a href="https://instagram.com/qsopa" aria-label="Instagram">
+            <i className="fab fa-instagram"></i>
+          </a>
+        </div>
+      </div>
+    </footer>
+  );
+}
+```
+
+### With Contact Information
+
+```jsx
+export default function Footer() {
+  return (
+    <footer className="footer">
+      <div className="footer-grid">
+        <div className="footer-section">
+          <h4>Q Sopa</h4>
+          <p>© 2023 Todos los derechos reservados.</p>
+        </div>
+        <div className="footer-section">
+          <h4>Contacto</h4>
+          <p>Tel: (123) 456-7890</p>
+          <p>Email: info@qsopa.com</p>
+        </div>
+        <div className="footer-section">
+          <h4>Horario</h4>
+          <p>Lun-Vie: 11am - 10pm</p>
+          <p>Sáb-Dom: 12pm - 11pm</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+```
+
+## Positioning
+
+The Footer can be positioned in different ways depending on the layout needs:
+
+<Tabs>
+  <Tab title="Static">
+    ```css
+    .footer {
+      position: static;
+      /* Appears after all content */
+    }
+    ```
+    
+    Default behavior - footer appears after page content.
+  </Tab>
+  
+  <Tab title="Sticky">
+    ```css
+    .footer {
+      position: sticky;
+      bottom: 0;
+      /* Sticks to bottom when scrolling */
+    }
+    ```
+    
+    Stays at bottom of viewport when scrolling.
+  </Tab>
+  
+  <Tab title="Fixed">
+    ```css
+    .footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      /* Always visible at bottom */
+    }
+    ```
+    
+    Always visible at the bottom of the screen.
+  </Tab>
+</Tabs>
+
+## Accessibility
+
+The component uses semantic HTML with the `<footer>` element:
+
+```jsx
+<footer className="footer">
+```
+
+This provides semantic meaning for:
+- Screen readers
+- Search engines
+- Browser reader modes
+- Accessibility tools
+
+<Note>
+  Using `<footer>` instead of `<div className="footer">` improves accessibility and SEO.
+</Note>
+
+## Responsive Design
+
+The Footer should adapt to different screen sizes:
+
+```css
+.footer {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 1.5rem 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+```
+
+## Integration in Layout
+
+The Footer works with the overall page layout:
+
+```jsx
+<div className="app-layout">
+  <Navbar />           {/* Fixed at top */}
+  <main>               {/* Scrollable content */}
+    {/* Page content */}
+  </main>
+  <Footer />           {/* At bottom */}
+</div>
+```
+
+CSS for proper layout:
+
+```css
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1; /* Pushes footer to bottom */
+}
+```
+
+## Testing
+
+The Footer is easy to test due to its simplicity:
+
+```jsx
+import { render, screen } from '@testing-library/react';
+import Footer from './footer';
+
+test('renders copyright text', () => {
+  render(<Footer />);
+  const copyrightText = screen.getByText(/Q sopa todos los derechos reservados/i);
+  expect(copyrightText).toBeInTheDocument();
+});
+
+test('renders as footer element', () => {
+  const { container } = render(<Footer />);
+  const footer = container.querySelector('footer');
+  expect(footer).toBeInTheDocument();
+  expect(footer).toHaveClass('footer');
+});
+```
+
+## Common Patterns
+
+<CardGroup cols={2}>
+  <Card title="Consistent Branding" icon="paintbrush">
+    Use the same colors and fonts as the Navbar for visual consistency.
+  </Card>
+  
+  <Card title="Legal Links" icon="scale-balanced">
+    Include links to privacy policy, terms of service, and cookie policy.
+  </Card>
+  
+  <Card title="Contact Info" icon="address-card">
+    Display restaurant address, phone, and hours.
+  </Card>
+  
+  <Card title="Newsletter Signup" icon="envelope">
+    Add a newsletter subscription form for marketing.
+  </Card>
+</CardGroup>
+
+<Warning>
+  If you update the copyright year, remember to update it in the source code. Better yet, implement dynamic year calculation so it updates automatically.
+</Warning>

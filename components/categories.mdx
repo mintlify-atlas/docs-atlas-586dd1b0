@@ -1,0 +1,362 @@
+---
+title: Categories Component
+description: Responsive category selector with desktop horizontal menu and mobile drawer navigation
+---
+
+## Overview
+
+The Categories component is a sophisticated, responsive navigation element that fetches and displays menu categories. It provides two distinct experiences:
+
+- **Desktop**: Horizontal icon-based menu with category names
+- **Mobile**: Hamburger menu that opens a slide-in drawer
+
+## Location
+
+```
+src/components/Categories/Categories.jsx
+src/components/Categories/Categories.css
+```
+
+## Props
+
+<ParamField path="onCategoryChange" type="function" required>
+  Callback function invoked when a category is selected. Receives the category ID as a parameter.
+  
+  ```jsx
+  (categoryId: number) => void
+  ```
+</ParamField>
+
+## State Management
+
+The component manages multiple pieces of internal state:
+
+```jsx
+const [active, setActive] = useState(null);        // Currently selected category ID
+const [categories, setCategories] = useState([]);  // Array of category objects from API
+const [loading, setLoading] = useState(true);      // Loading state for API fetch
+const [error, setError] = useState(null);          // Error message if fetch fails
+const [drawerOpen, setDrawerOpen] = useState(false); // Mobile drawer open/close state
+```
+
+## Data Fetching
+
+Categories are fetched from the API on component mount:
+
+```jsx
+import { getCategorias } from "../../services/api";
+
+useEffect(() => {
+  getCategorias()
+    .then((data) => {
+      setCategories(data);
+    })
+    .catch((err) => setError(err.message))
+    .finally(() => setLoading(false));
+}, []);
+```
+
+The `getCategorias()` function fetches from:
+```
+https://apiqsp-production.up.railway.app/categories
+```
+
+### Expected API Response
+
+The API returns an array of category objects:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Hamburguesas",
+    "icon": "lunch_dining"
+  },
+  {
+    "id": 2,
+    "name": "Bebidas",
+    "icon": "local_cafe"
+  }
+  // ...
+]
+```
+
+<Note>
+  Each category must have an `id`, `name`, and `icon` property. The `icon` value corresponds to Material Symbols icon names.
+</Note>
+
+## Icon Integration
+
+The component uses **Material Symbols Outlined** icons:
+
+```jsx
+<span className="material-symbols-outlined">{cat.icon}</span>
+```
+
+Make sure Material Symbols is included in your project:
+
+```html
+<!-- In your index.html or via import -->
+<link rel="stylesheet" 
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+```
+
+## Desktop UI
+
+The desktop version renders as a horizontal menu:
+
+```jsx
+<div className="categories-wrapper">
+  <div className="categories-container">
+    {categories.map((cat) => (
+      <button
+        key={cat.id}
+        className={`category-btn ${active === cat.id ? "active" : ""}`}
+        onClick={() => handleClick(cat.id)}
+      >
+        <div className="category-icon">
+          <span className="material-symbols-outlined">{cat.icon}</span>
+        </div>
+        <span className="category-label">{cat.name}</span>
+        <div className="category-underline" />
+      </button>
+    ))}
+  </div>
+</div>
+```
+
+**Key Features:**
+- Icon + label for each category
+- Active state styling with `.active` class
+- Underline animation on hover/active state
+
+## Mobile UI
+
+The mobile experience includes three elements:
+
+### 1. Hamburger Toggle Button
+
+```jsx
+<button
+  className="drawer-toggle"
+  onClick={() => setDrawerOpen(true)}
+  aria-label="Abrir menú de categorías"
+>
+  <span />
+  <span />
+  <span />
+</button>
+```
+
+### 2. Overlay Backdrop
+
+```jsx
+<div
+  className={`drawer-overlay ${drawerOpen ? "open" : ""}`}
+  onClick={() => setDrawerOpen(false)}
+/>
+```
+
+Clicking the overlay closes the drawer.
+
+### 3. Slide-in Drawer Panel
+
+```jsx
+<nav className={`drawer-panel ${drawerOpen ? "open" : ""}`}>
+  <span className="drawer-title">Categorías</span>
+  {categories.map((cat) => (
+    <button
+      key={cat.id}
+      className={`drawer-item ${active === cat.id ? "active" : ""}`}
+      onClick={() => handleClick(cat.id)}
+    >
+      <div className="drawer-item-icon">
+        <span className="material-symbols-outlined">{cat.icon}</span>
+      </div>
+      <span className="drawer-item-label">{cat.name}</span>
+      <div className="drawer-item-dot" />
+    </button>
+  ))}
+</nav>
+```
+
+## Keyboard Accessibility
+
+The drawer can be closed with the Escape key:
+
+```jsx
+useEffect(() => {
+  const handleKey = (e) => {
+    if (e.key === "Escape") setDrawerOpen(false);
+  };
+  window.addEventListener("keydown", handleKey);
+  return () => window.removeEventListener("keydown", handleKey);
+}, []);
+```
+
+## Event Handling
+
+When a category is clicked:
+
+```jsx
+const handleClick = (id) => {
+  setActive(id);              // Update active state
+  onCategoryChange?.(id);     // Notify parent component
+  setDrawerOpen(false);       // Close mobile drawer
+};
+```
+
+<Note>
+  The optional chaining operator `?.` ensures the callback is only invoked if provided.
+</Note>
+
+## Loading and Error States
+
+```jsx
+if (loading) return <p className="categories-status">Cargando...</p>;
+if (error)   return <p className="categories-status error">{error}</p>;
+```
+
+These states are displayed while fetching categories or if the fetch fails.
+
+## Complete Source Code
+
+```jsx src/components/Categories/Categories.jsx
+import "./Categories.css";
+import { useState, useEffect } from "react";
+import { getCategorias } from "../../services/api";
+
+export default function Categories({ onCategoryChange }) {
+  const [active, setActive] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    getCategorias()
+      .then((data) => {
+        setCategories(data);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Cierra el drawer con Escape
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "Escape") setDrawerOpen(false);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
+  const handleClick = (id) => {
+    setActive(id);
+    onCategoryChange?.(id);
+    setDrawerOpen(false);
+  };
+
+  if (loading) return <p className="categories-status">Cargando...</p>;
+  if (error)   return <p className="categories-status error">{error}</p>;
+
+  return (
+    <>
+      {/* ── DESKTOP: menú horizontal ── */}
+      <div className="categories-wrapper">
+        <div className="categories-container">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              className={`category-btn ${active === cat.id ? "active" : ""}`}
+              onClick={() => handleClick(cat.id)}
+            >
+              <div className="category-icon">
+                <span className="material-symbols-outlined">{cat.icon}</span>
+              </div>
+              <span className="category-label">{cat.name}</span>
+              <div className="category-underline" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── MOBILE: botón hamburguesa ── */}
+      <button
+        className="drawer-toggle"
+        onClick={() => setDrawerOpen(true)}
+        aria-label="Abrir menú de categorías"
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      {/* ── MOBILE: overlay ── */}
+      <div
+        className={`drawer-overlay ${drawerOpen ? "open" : ""}`}
+        onClick={() => setDrawerOpen(false)}
+      />
+
+      {/* ── MOBILE: panel lateral ── */}
+      <nav className={`drawer-panel ${drawerOpen ? "open" : ""}`}>
+        <span className="drawer-title">Categorías</span>
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            className={`drawer-item ${active === cat.id ? "active" : ""}`}
+            onClick={() => handleClick(cat.id)}
+          >
+            <div className="drawer-item-icon">
+              <span className="material-symbols-outlined">{cat.icon}</span>
+            </div>
+            <span className="drawer-item-label">{cat.name}</span>
+            <div className="drawer-item-dot" />
+          </button>
+        ))}
+      </nav>
+    </>
+  );
+}
+```
+
+## Usage Example
+
+```jsx
+import Categories from "./components/Categories/Categories";
+
+function MyPage() {
+  const handleCategoryChange = (categoryId) => {
+    console.log(`Selected category: ${categoryId}`);
+    // Fetch products for this category
+  };
+  
+  return (
+    <Categories onCategoryChange={handleCategoryChange} />
+  );
+}
+```
+
+## Responsive Behavior
+
+<Tabs>
+  <Tab title="Desktop">
+    - Horizontal scrollable menu of category buttons
+    - Icons displayed above labels
+    - Hover effects and active state underline
+    - Hamburger button hidden via CSS
+  </Tab>
+  
+  <Tab title="Mobile">
+    - Desktop categories menu hidden via CSS
+    - Hamburger menu button visible in top-right
+    - Click hamburger to open slide-in drawer from right
+    - Semi-transparent overlay dims the background
+    - Click category or overlay to close drawer
+    - Press Escape to close drawer
+  </Tab>
+</Tabs>
+
+<Warning>
+  The component assumes the API endpoint is available and returns properly formatted data. Network errors are caught and displayed to the user.
+</Warning>
